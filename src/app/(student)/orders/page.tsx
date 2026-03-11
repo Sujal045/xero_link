@@ -160,7 +160,11 @@ export default function OrdersPage() {
                   return (
                     <div key={step} className="flex-1 flex flex-col items-center relative">
                       {i < STATUS_STEPS.length - 1 && (
-                        <div className={`absolute top-5 left-1/2 right-0 h-0.5 transition-all ${done && i < stepIdx ? 'bg-emerald-500' : 'bg-white/10'}`} />
+                        <div
+                          className={`absolute top-5 left-1/2 w-full h-0.5 transition-all ${
+                            done && i < stepIdx ? "bg-emerald-500" : "bg-white/10"
+                          }`}
+                        />
                       )}
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all ${done ? 'bg-emerald-500 shadow-lg shadow-emerald-500/30' : 'bg-white/8 border border-white/10'}`}>
                         <Icon className={`h-4 w-4 ${done ? 'text-white' : 'text-slate-600'}`} />

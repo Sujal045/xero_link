@@ -44,9 +44,9 @@ export default function MapPage() {
 
       // Fetch shops filtered by university if available
       let query = supabase.from('shops').select('*')
-      if (userData?.university_id) {
-        query = query.eq('university_id', userData.university_id)
-      }
+      // if (userData?.university_id) {
+      //   query = query.eq('university_id', userData.university_id)
+      // }
       const { data: shopsData } = await query
 
       if (shopsData && shopsData.length > 0) {

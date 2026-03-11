@@ -54,8 +54,9 @@ export default function OrderPage() {
       try {
         const count = await getPDFPageCount(f)
         setPageCount(count)
-      } catch {
-        setPageCount(1) // fallback
+      } catch (err) {
+        console.error("PDF detection error:", err)
+        setPageCount(1)
       } finally {
         setDetecting(false)
       }

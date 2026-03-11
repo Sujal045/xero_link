@@ -11,7 +11,7 @@ import { Printer, Loader2, ArrowRight } from 'lucide-react'
 export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()
-  
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -21,7 +21,7 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -41,7 +41,7 @@ export default function LoginPage() {
         .select('role')
         .eq('id', userId)
         .single()
-        
+
       if (userData?.role === 'student' || userData?.role === 'faculty') {
         router.push('/map')
       } else if (userData?.role === 'owner') {
@@ -73,7 +73,7 @@ export default function LoginPage() {
               {error}
             </div>
           )}
-          
+
           <div className="space-y-1">
             <label className="text-xs font-medium text-slate-300 uppercase tracking-wider ml-1">Email</label>
             <Input
@@ -86,7 +86,7 @@ export default function LoginPage() {
               className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-emerald-500/50"
             />
           </div>
-          
+
           <div className="space-y-1">
             <div className="flex items-center justify-between ml-1">
               <label className="text-xs font-medium text-slate-300 uppercase tracking-wider">Password</label>
@@ -103,8 +103,8 @@ export default function LoginPage() {
             />
           </div>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-emerald-500/25 h-12 text-base rounded-xl mt-2 group" 
             disabled={loading}
           >
@@ -112,7 +112,7 @@ export default function LoginPage() {
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             ) : (
               <>
-                Sign In 
+                Sign In
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </>
             )}
