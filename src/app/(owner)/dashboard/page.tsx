@@ -76,7 +76,7 @@ export default function OwnerDashboard() {
       // Check role
       const { data: userData } = await supabase
         .from('users').select('role').eq('id', user.id).maybeSingle()
-      if (userData?.role !== 'owner') { router.push('/map'); return }
+      if (userData?.role !== 'owner') { router.push('/shops'); return }
 
       // Get shop owned by this user
       const { data: shopData } = await supabase

@@ -95,7 +95,7 @@ export default function OrdersPage() {
             <Printer className="h-14 w-14 text-slate-700 mb-4" />
             <p className="text-slate-300 font-semibold text-lg">No orders yet</p>
             <p className="text-slate-500 text-sm mt-1">Find a shop and place your first order</p>
-            <button onClick={() => router.push('/map')}
+            <button onClick={() => router.push('/shops')}
               className="mt-5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors">
               Browse Shops
             </button>

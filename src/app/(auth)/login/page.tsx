@@ -43,7 +43,7 @@ export default function LoginPage() {
         .single()
 
       if (userData?.role === 'student' || userData?.role === 'faculty') {
-        router.push('/map')
+        router.push('/shops')
       } else if (userData?.role === 'owner') {
         router.push('/dashboard')
       } else if (userData?.role === 'delivery') {

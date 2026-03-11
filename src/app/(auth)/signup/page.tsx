@@ -64,7 +64,7 @@ export default function SignupPage() {
 
     // 3. Redirect based on role
     if (role === 'student') {
-      router.push('/map')
+      router.push('/shops')
     } else {
       router.push('/dashboard')
     }
