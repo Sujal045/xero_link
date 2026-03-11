@@ -13,7 +13,7 @@ import {
 
 interface Order {
   id: string
-  status: 'pending' | 'printing' | 'ready' | 'delivered'
+  status: 'pending' | 'printing' | 'ready' | 'delivered'| 'rejected'
   total_pages: number
   print_type: 'bw' | 'color'
   sides: 'single' | 'double'
@@ -169,13 +169,18 @@ export default function OwnerDashboard() {
   }
 
   const updateStatus = async (orderId: string, newStatus: string) => {
-    await supabase
+    const { error } = await supabase
       .from('orders')
       .update({
         status: newStatus,
         ...(newStatus === 'ready' ? { printed_at: new Date().toISOString() } : {})
       })
       .eq('id', orderId)
+
+    if (error) {
+      console.error(error)
+    }
+
     if (shop) fetchData(shop.id)
   }
 

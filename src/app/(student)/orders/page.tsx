@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
-  Clock, CheckCircle2, Printer, Package, MapPin, RefreshCw
+  Clock, CheckCircle2, Printer, Package, MapPin, RefreshCw,
+  XCircle
 } from 'lucide-react'
 
 interface Order {
@@ -28,6 +29,7 @@ const STATUS_META: Record<string, { label: string; icon: React.ElementType; colo
   printing:  { label: 'Printing',         icon: Printer,       color: 'text-blue-400' },
   ready:     { label: 'Ready for Pickup', icon: Package,       color: 'text-purple-400' },
   delivered: { label: 'Delivered',        icon: CheckCircle2,  color: 'text-emerald-400' },
+  rejected: { label: 'Rejected',        icon: XCircle,  color: 'text-emerald-400' },
 }
 
 export default function OrdersPage() {
