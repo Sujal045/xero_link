@@ -379,11 +379,23 @@ export default function OwnerDashboard() {
   )
 }
 
-function getOrderAgeMinutes(createdAt: string) {
-  return Math.max(
-    0,
-    Math.round((Date.now() - new Date(createdAt + "Z").getTime()) / 60000)
-  )
+function getOrderAge(createdAt: string) {
+  const created = new Date(createdAt.endsWith("Z") ? createdAt : createdAt + "Z")
+
+  const diffMs = Date.now() - created.getTime()
+
+  const minutes = Math.floor(diffMs / 60000)
+  if (minutes < 60) {
+    return `${minutes} min${minutes !== 1 ? "s" : ""}`
+  }
+
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) {
+    return `${hours} hr${hours !== 1 ? "s" : ""}`
+  }
+
+  const days = Math.floor(hours / 24)
+  return `${days} day${days !== 1 ? "s" : ""}`
 }
 
 function OrderCard({ order, onStatusChange }: {
@@ -392,10 +404,10 @@ function OrderCard({ order, onStatusChange }: {
 }) {
   const [updating, setUpdating] = useState(false)
   const [rejecting, setRejecting] = useState(false)
-  const [age, setAge] = useState(0)
+  const [age, setAge] = useState("")
 
   useEffect(() => {
-    const updateAge = () => setAge(getOrderAgeMinutes(order.created_at))
+    const updateAge = () => setAge(getOrderAge(order.created_at))
     updateAge()
 
     const intervalId = window.setInterval(updateAge, 60000)
@@ -435,7 +447,7 @@ function OrderCard({ order, onStatusChange }: {
                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
               </span>
               <span className="flex items-center gap-1 text-xs text-slate-500">
-                <Clock className="h-3 w-3" /> {age}m ago
+                <Clock className="h-3 w-3" /> {age}
               </span>
             </div>
           </div>
