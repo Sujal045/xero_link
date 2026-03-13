@@ -40,6 +40,7 @@ export default function OrderPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
+  const [deliveryAddress, setDeliveryAddress] = useState('')
 
   useEffect(() => {
     supabase.from('shops').select('*').eq('id', shopId).single()
@@ -77,7 +78,7 @@ export default function OrderPage() {
     : 0
 
   const handleSubmit = async () => {
-    if (!file || !shop || pageCount === 0) return
+    if (!file || !shop || pageCount === 0 || !deliveryAddress.trim()) return
     setSubmitting(true)
     setError(null)
 
@@ -104,6 +105,7 @@ export default function OrderPage() {
       total_price: price,
       otp,
       delivery_slot: slot,
+      delivery_address: deliveryAddress.trim(),
     }).select().single()
 
     if (orderErr || !order) {
@@ -264,6 +266,20 @@ export default function OrderPage() {
           </div>
         </div>
 
+        {/* Delivery Address */}
+        <div>
+          <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Delivery Address</h2>
+          <div className="rounded-2xl bg-white/4 border border-white/8 p-4">
+            <textarea
+              rows={3}
+              placeholder="Enter your full delivery address (house no., street, area, city…)"
+              value={deliveryAddress}
+              onChange={e => setDeliveryAddress(e.target.value)}
+              className="w-full bg-transparent text-white placeholder:text-slate-500 text-sm resize-none focus:outline-none"
+            />
+          </div>
+        </div>
+
         {/* Price Breakdown */}
         {file && pageCount > 0 && (
           <div className="rounded-2xl bg-gradient-to-br from-emerald-900/30 to-slate-900/50 border border-emerald-500/20 p-5">
@@ -303,7 +319,7 @@ export default function OrderPage() {
       <div className="fixed bottom-0 inset-x-0 p-5 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent">
         <Button
           onClick={handleSubmit}
-          disabled={!file || pageCount === 0 || detecting || submitting || !shop.is_open}
+          disabled={!file || pageCount === 0 || detecting || submitting || !shop.is_open || !deliveryAddress.trim()}
           className="w-full h-14 text-base font-semibold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 rounded-2xl shadow-xl shadow-emerald-500/20 disabled:opacity-40"
         >
           {submitting ? (

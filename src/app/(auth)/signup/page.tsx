@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Printer, Loader2, ArrowRight, User, Building2 } from 'lucide-react'
+import { Printer, Loader2, ArrowRight, User, Building2, Truck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function SignupPage() {
@@ -20,7 +20,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [phone, setPhone] = useState('')
-  const [role, setRole] = useState<'student' | 'owner'>('student')
+  const [role, setRole] = useState<'student' | 'owner' | 'delivery'>('student')
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,6 +65,8 @@ export default function SignupPage() {
     // 3. Redirect based on role
     if (role === 'student') {
       router.push('/shops')
+    } else if (role === 'delivery') {
+      router.push('/slot')
     } else {
       router.push('/dashboard')
     }
@@ -92,32 +94,45 @@ export default function SignupPage() {
           )}
 
           {/* Role Selection */}
-          <div className="grid grid-cols-2 gap-3 mb-2">
+          <div className="grid grid-cols-3 gap-2 mb-2">
             <button
               type="button"
               onClick={() => setRole('student')}
               className={cn(
-                "flex flex-col items-center justify-center space-y-2 p-4 rounded-2xl border transition-all duration-300",
+                "flex flex-col items-center justify-center space-y-2 p-3 rounded-2xl border transition-all duration-300",
                 role === 'student' 
                   ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-lg shadow-emerald-500/5" 
                   : "border-white/10 bg-black/20 text-slate-400 hover:bg-white/5 hover:text-slate-300"
               )}
             >
-              <User className="h-6 w-6" />
-              <span className="text-sm font-medium">Student</span>
+              <User className="h-5 w-5" />
+              <span className="text-xs font-medium">Student</span>
             </button>
             <button
               type="button"
               onClick={() => setRole('owner')}
               className={cn(
-                "flex flex-col items-center justify-center space-y-2 p-4 rounded-2xl border transition-all duration-300",
+                "flex flex-col items-center justify-center space-y-2 p-3 rounded-2xl border transition-all duration-300",
                 role === 'owner' 
                   ? "border-blue-500/50 bg-blue-500/10 text-blue-400 shadow-lg shadow-blue-500/5" 
                   : "border-white/10 bg-black/20 text-slate-400 hover:bg-white/5 hover:text-slate-300"
               )}
             >
-              <Building2 className="h-6 w-6" />
-              <span className="text-sm font-medium">Shop Owner</span>
+              <Building2 className="h-5 w-5" />
+              <span className="text-xs font-medium">Shop Owner</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('delivery')}
+              className={cn(
+                "flex flex-col items-center justify-center space-y-2 p-3 rounded-2xl border transition-all duration-300",
+                role === 'delivery' 
+                  ? "border-purple-500/50 bg-purple-500/10 text-purple-400 shadow-lg shadow-purple-500/5" 
+                  : "border-white/10 bg-black/20 text-slate-400 hover:bg-white/5 hover:text-slate-300"
+              )}
+            >
+              <Truck className="h-5 w-5" />
+              <span className="text-xs font-medium">Delivery</span>
             </button>
           </div>
           
