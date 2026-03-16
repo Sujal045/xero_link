@@ -77,7 +77,7 @@ export default function SignupPage() {
     <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-500 my-8">
       <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-xl">
         <div className="flex flex-col items-center space-y-3 mb-8">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/30">
             <Printer className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-white">Create Account</h1>
@@ -101,7 +101,7 @@ export default function SignupPage() {
               className={cn(
                 "flex flex-col items-center justify-center space-y-2 p-3 rounded-2xl border transition-all duration-300",
                 role === 'student' 
-                  ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-lg shadow-emerald-500/5" 
+                  ? "border-blue-500/50 bg-blue-500/10 text-blue-400 shadow-lg shadow-blue-500/5" 
                   : "border-white/10 bg-black/20 text-slate-400 hover:bg-white/5 hover:text-slate-300"
               )}
             >
@@ -145,7 +145,7 @@ export default function SignupPage() {
               onChange={(e) => setName(e.target.value)}
               required
               disabled={loading}
-              className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-emerald-500/50"
+              className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
             />
           </div>
 
@@ -158,7 +158,7 @@ export default function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
-              className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-emerald-500/50"
+              className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
             />
           </div>
 
@@ -171,7 +171,7 @@ export default function SignupPage() {
               onChange={(e) => setPhone(e.target.value)}
               required
               disabled={loading}
-              className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-emerald-500/50"
+              className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
             />
           </div>
           
@@ -184,13 +184,13 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
-              className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-emerald-500/50"
+              className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
             />
           </div>
 
           <Button 
             type="submit" 
-            className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-emerald-500/25 h-12 text-base rounded-xl mt-4 group" 
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white shadow-blue-500/25 h-12 text-base rounded-xl mt-4 group" 
             disabled={loading}
           >
             {loading ? (
@@ -206,7 +206,7 @@ export default function SignupPage() {
 
         <div className="mt-8 text-center text-sm text-slate-400">
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
+          <Link href="/login" className="font-semibold text-blue-400 hover:text-blue-300 transition-colors">
             Sign In
           </Link>
         </div>

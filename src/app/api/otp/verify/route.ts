@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = createAdminClient()
 
-    // Fetch the order
+    // Fetch the order — select user name via join
     const { data: order, error } = await supabase
       .from('orders')
       .select('otp, status, total_price, users(name)')
@@ -31,9 +31,18 @@ export async function POST(req: NextRequest) {
       .update({ status: 'delivered', otp_verified: true })
       .eq('id', orderId)
 
+    // Supabase join may return array or object — handle both
+    const usersField = order.users
+    let studentName = 'Student'
+    if (Array.isArray(usersField) && usersField.length > 0) {
+      studentName = (usersField[0] as { name: string }).name ?? 'Student'
+    } else if (usersField && typeof usersField === 'object' && 'name' in usersField) {
+      studentName = (usersField as { name: string }).name ?? 'Student'
+    }
+
     return NextResponse.json({
       success: true,
-      studentName: (order.users as { name: string } | null)?.name ?? 'Student',
+      studentName,
       amount: order.total_price,
     })
   } catch {
