@@ -42,11 +42,35 @@ export default function LoginPage() {
         .eq('id', userId)
         .single()
 
-      if (userData?.role === 'student' || userData?.role === 'faculty') {
+      let finalRole = userData?.role
+
+      if (!finalRole) {
+        // Try to recreate it using auth metadata stored during signup.
+        const metadata = data.user?.user_metadata
+        if (metadata) {
+          const res = await fetch('/api/users/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: userId,
+              name: metadata.name || 'User',
+              role: metadata.role || 'student',
+              phone: metadata.phone || null
+            }),
+          })
+          if (res.ok) {
+            finalRole = metadata.role || 'student'
+          }
+        }
+      }
+
+      if (!finalRole) finalRole = 'student'
+
+      if (finalRole === 'student' || finalRole === 'faculty') {
         router.push('/shops')
-      } else if (userData?.role === 'owner') {
+      } else if (finalRole === 'owner') {
         router.push('/dashboard')
-      } else if (userData?.role === 'delivery') {
+      } else if (finalRole === 'delivery') {
         router.push('/slot')
       } else {
         router.push('/')

@@ -15,12 +15,11 @@ export async function POST(req: NextRequest) {
 
     const supabaseAdmin = createAdminClient()
 
-    const { error } = await supabaseAdmin.from('users').insert({
-      id,
-      name,
-      role,
-      phone: phone || null,
-    })
+    // Using upsert so auto-healing or retries don't fail with a duplicate-key violation
+    const { error } = await supabaseAdmin.from('users').upsert(
+      { id, name, role, phone: phone || null },
+      { onConflict: 'id' }
+    )
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
