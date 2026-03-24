@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -15,6 +15,20 @@ export default function SignupPage() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Redirect already-authenticated users away from signup
+  useEffect(() => {
+    const check = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from('users').select('role').eq('id', user.id).single()
+      const role = data?.role ?? user.user_metadata?.role ?? 'student'
+      if (role === 'owner') router.push('/dashboard')
+      else if (role === 'delivery') router.push('/slot')
+      else router.push('/shops')
+    }
+    check()
+  }, [])
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')

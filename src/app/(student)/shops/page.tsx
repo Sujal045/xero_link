@@ -20,7 +20,7 @@ interface Shop {
   pendingPages?: number
 }
 
-export default function MapPage() {
+export default function ShopsPage() {
   const router = useRouter()
   const supabase = createClient()
 
