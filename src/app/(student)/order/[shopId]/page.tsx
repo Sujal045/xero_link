@@ -40,6 +40,7 @@ export default function OrderPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
+  const [deliveryAddress, setDeliveryAddress] = useState('')
 
   useEffect(() => {
     supabase.from('shops').select('*').eq('id', shopId).single()
@@ -77,7 +78,7 @@ export default function OrderPage() {
     : 0
 
   const handleSubmit = async () => {
-    if (!file || !shop || pageCount === 0) return
+    if (!file || !shop || pageCount === 0 || !deliveryAddress.trim()) return
     setSubmitting(true)
     setError(null)
 
@@ -104,6 +105,7 @@ export default function OrderPage() {
       total_price: price,
       otp,
       delivery_slot: slot,
+      delivery_address: deliveryAddress.trim(),
     }).select().single()
 
     if (orderErr || !order) {
@@ -142,7 +144,7 @@ export default function OrderPage() {
   if (!shop) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
     )
   }
@@ -162,7 +164,7 @@ export default function OrderPage() {
               <span className="flex items-center gap-1 text-xs text-slate-400">
                 <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {shop.rating}
               </span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${shop.is_open ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-700 text-slate-500'}`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${shop.is_open ? 'bg-blue-500/15 text-blue-400' : 'bg-slate-700 text-slate-500'}`}>
                 {shop.is_open ? 'Open' : 'Closed'}
               </span>
             </div>
@@ -181,9 +183,9 @@ export default function OrderPage() {
             onClick={() => document.getElementById('file-input')?.click()}
             className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-300 ${
               dragOver
-                ? 'border-emerald-400/60 bg-emerald-500/10'
+                ? 'border-blue-400/60 bg-blue-500/10'
                 : file
-                ? 'border-emerald-500/40 bg-emerald-500/5'
+                ? 'border-blue-500/40 bg-blue-500/5'
                 : 'border-white/10 bg-white/3 hover:border-white/20 hover:bg-white/6'
             }`}
           >
@@ -197,11 +199,11 @@ export default function OrderPage() {
             {file ? (
               <div className="space-y-2">
                 <div className="flex items-center justify-center gap-2">
-                  <FileText className="h-8 w-8 text-emerald-400" />
+                  <FileText className="h-8 w-8 text-blue-400" />
                   {detecting && <Loader2 className="h-4 w-4 animate-spin text-slate-400" />}
                 </div>
                 <p className="text-white font-medium truncate max-w-xs mx-auto">{file.name}</p>
-                <p className="text-sm text-emerald-400">
+                <p className="text-sm text-blue-400">
                   {detecting ? 'Detecting pages…' : `${pageCount} page${pageCount !== 1 ? 's' : ''} detected`}
                 </p>
                 <p className="text-xs text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB · Tap to change</p>
@@ -228,7 +230,7 @@ export default function OrderPage() {
               <div className="grid grid-cols-2 gap-2">
                 {(['bw', 'color'] as PrintType[]).map(pt => (
                   <button key={pt} onClick={() => setPrintType(pt)}
-                    className={`rounded-xl py-3 text-sm font-semibold transition-all ${printType === pt ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>
+                    className={`rounded-xl py-3 text-sm font-semibold transition-all ${printType === pt ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>
                     {pt === 'bw' ? `B&W · ₹${shop.price_bw}/pg` : `Color · ₹${shop.price_color}/pg`}
                   </button>
                 ))}
@@ -241,7 +243,7 @@ export default function OrderPage() {
               <div className="grid grid-cols-2 gap-2">
                 {(['single', 'double'] as Sides[]).map(s => (
                   <button key={s} onClick={() => setSides(s)}
-                    className={`rounded-xl py-3 text-sm font-semibold capitalize transition-all ${sides === s ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>
+                    className={`rounded-xl py-3 text-sm font-semibold capitalize transition-all ${sides === s ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>
                     {s === 'double' ? 'Double-sided (−10%)' : 'Single-sided'}
                   </button>
                 ))}
@@ -264,9 +266,23 @@ export default function OrderPage() {
           </div>
         </div>
 
+        {/* Delivery Address */}
+        <div>
+          <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Delivery Address</h2>
+          <div className="rounded-2xl bg-white/4 border border-white/8 p-4">
+            <textarea
+              rows={3}
+              placeholder="Enter your full delivery address (house no., street, area, city…)"
+              value={deliveryAddress}
+              onChange={e => setDeliveryAddress(e.target.value)}
+              className="w-full bg-transparent text-white placeholder:text-slate-500 text-sm resize-none focus:outline-none"
+            />
+          </div>
+        </div>
+
         {/* Price Breakdown */}
         {file && pageCount > 0 && (
-          <div className="rounded-2xl bg-gradient-to-br from-emerald-900/30 to-slate-900/50 border border-emerald-500/20 p-5">
+          <div className="rounded-2xl bg-gradient-to-br from-blue-900/30 to-slate-900/50 border border-blue-500/20 p-5">
             <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Price Breakdown</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-slate-400">
@@ -274,7 +290,7 @@ export default function OrderPage() {
                 <span>₹{(pageCount * (printType === 'bw' ? shop.price_bw : shop.price_color) * copies).toFixed(2)}</span>
               </div>
               {sides === 'double' && (
-                <div className="flex justify-between text-emerald-400">
+                <div className="flex justify-between text-blue-400">
                   <span>Double-sided discount (−10%)</span>
                   <span>−₹{(pageCount * (printType === 'bw' ? shop.price_bw : shop.price_color) * copies * 0.1).toFixed(2)}</span>
                 </div>
@@ -285,7 +301,7 @@ export default function OrderPage() {
               </div>
               <div className="border-t border-white/10 pt-2 flex justify-between font-bold text-white text-base">
                 <span>Total (Cash on Delivery)</span>
-                <span className="text-emerald-400">₹{price.toFixed(2)}</span>
+                <span className="text-blue-400">₹{price.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -303,8 +319,8 @@ export default function OrderPage() {
       <div className="fixed bottom-0 inset-x-0 p-5 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent">
         <Button
           onClick={handleSubmit}
-          disabled={!file || pageCount === 0 || detecting || submitting || !shop.is_open}
-          className="w-full h-14 text-base font-semibold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 rounded-2xl shadow-xl shadow-emerald-500/20 disabled:opacity-40"
+          disabled={!file || pageCount === 0 || detecting || submitting || !shop.is_open || !deliveryAddress.trim()}
+          className="w-full h-14 text-base font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 rounded-2xl shadow-xl shadow-blue-500/20 disabled:opacity-40"
         >
           {submitting ? (
             <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Placing Order…</>

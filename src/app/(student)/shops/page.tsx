@@ -20,7 +20,7 @@ interface Shop {
   pendingPages?: number
 }
 
-export default function MapPage() {
+export default function ShopsPage() {
   const router = useRouter()
   const supabase = createClient()
 
@@ -95,7 +95,7 @@ export default function MapPage() {
           </div>
           <Link href="/orders">
             <div className="flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2 border border-white/10 hover:bg-white/10 transition-colors">
-              <Printer className="h-4 w-4 text-emerald-400" />
+              <Printer className="h-4 w-4 text-blue-400" />
               <span className="text-sm text-white font-medium">My Orders</span>
             </div>
           </Link>
@@ -109,7 +109,7 @@ export default function MapPage() {
             placeholder="Search nearby shops…"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 rounded-2xl text-sm text-white placeholder:text-slate-500 bg-white/5 border border-white/10 focus:outline-none focus:border-emerald-500/50 transition-all"
+            className="w-full pl-11 pr-4 py-3 rounded-2xl text-sm text-white placeholder:text-slate-500 bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50 transition-all"
           />
         </div>
       </header>
@@ -120,7 +120,7 @@ export default function MapPage() {
         {!loading && shops.length > 0 && (
           <div className="flex items-center gap-3 mb-4 px-1">
             <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
               <span className="text-xs text-slate-400">{openCount} open</span>
             </div>
             <span className="text-slate-700">·</span>
@@ -148,20 +148,20 @@ export default function MapPage() {
               const waitMin = calcWaitMinutes(shop.pendingPages ?? 0, shop.avg_print_time_sec)
               return (
                 <Link key={shop.id} href={`/order/${shop.id}`}>
-                  <div className="group relative rounded-2xl border border-white/8 bg-white/4 hover:bg-white/8 hover:border-emerald-500/20 p-4 transition-all duration-200 cursor-pointer active:scale-[0.98]">
+                  <div className="group relative rounded-2xl border border-white/8 bg-white/4 hover:bg-white/8 hover:border-blue-500/20 p-4 transition-all duration-200 cursor-pointer active:scale-[0.98]">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         {/* Icon */}
-                        <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 ${shop.is_open ? 'bg-emerald-500/15' : 'bg-slate-800'}`}>
+                        <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 ${shop.is_open ? 'bg-blue-500/15' : 'bg-slate-800'}`}>
                           {shop.is_open
-                            ? <Wifi className="h-5 w-5 text-emerald-400" />
+                            ? <Wifi className="h-5 w-5 text-blue-400" />
                             : <WifiOff className="h-5 w-5 text-slate-600" />}
                         </div>
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="font-semibold text-white truncate">{shop.shop_name}</h3>
-                            <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${shop.is_open ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-800 text-slate-500'}`}>
+                            <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${shop.is_open ? 'bg-blue-500/15 text-blue-400' : 'bg-slate-800 text-slate-500'}`}>
                               {shop.is_open ? 'Open' : 'Closed'}
                             </span>
                           </div>
@@ -189,7 +189,7 @@ export default function MapPage() {
                         </div>
                       </div>
 
-                      <ChevronRight className="h-5 w-5 text-slate-700 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+                      <ChevronRight className="h-5 w-5 text-slate-700 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
                     </div>
                   </div>
                 </Link>

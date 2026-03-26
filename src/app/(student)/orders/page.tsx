@@ -28,8 +28,8 @@ const STATUS_META: Record<string, { label: string; icon: React.ElementType; colo
   pending:   { label: 'Pending',          icon: Clock,         color: 'text-amber-400' },
   printing:  { label: 'Printing',         icon: Printer,       color: 'text-blue-400' },
   ready:     { label: 'Ready for Pickup', icon: Package,       color: 'text-purple-400' },
-  delivered: { label: 'Delivered',        icon: CheckCircle2,  color: 'text-emerald-400' },
-  rejected: { label: 'Rejected',        icon: XCircle,  color: 'text-emerald-400' },
+  delivered: { label: 'Delivered',        icon: CheckCircle2,  color: 'text-blue-400' },
+  rejected: { label: 'Rejected',        icon: XCircle,  color: 'text-blue-400' },
 }
 
 export default function OrdersPage() {
@@ -98,7 +98,7 @@ export default function OrdersPage() {
             <p className="text-slate-300 font-semibold text-lg">No orders yet</p>
             <p className="text-slate-500 text-sm mt-1">Find a shop and place your first order</p>
             <button onClick={() => router.push('/shops')}
-              className="mt-5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors">
+              className="mt-5 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors">
               Browse Shops
             </button>
           </div>
@@ -138,8 +138,8 @@ export default function OrdersPage() {
               <p className="text-xs text-slate-500 mb-1">{selectedOrder.shops?.shop_name}</p>
               <h2 className="text-2xl font-bold">{selectedOrder.status !== 'delivered' ? 'Your OTP' : '✓ Delivered'}</h2>
               {selectedOrder.status !== 'delivered' && (
-                <div className="mt-3 inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl px-6 py-3">
-                  <span className="text-4xl font-mono font-extrabold tracking-widest text-emerald-400">
+                <div className="mt-3 inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 rounded-2xl px-6 py-3">
+                  <span className="text-4xl font-mono font-extrabold tracking-widest text-blue-400">
                     {selectedOrder.otp}
                   </span>
                 </div>
@@ -164,11 +164,11 @@ export default function OrdersPage() {
                       {i < STATUS_STEPS.length - 1 && (
                         <div
                           className={`absolute top-5 left-1/2 w-full h-0.5 transition-all ${
-                            done && i < stepIdx ? "bg-emerald-500" : "bg-white/10"
+                            done && i < stepIdx ? "bg-blue-500" : "bg-white/10"
                           }`}
                         />
                       )}
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all ${done ? 'bg-emerald-500 shadow-lg shadow-emerald-500/30' : 'bg-white/8 border border-white/10'}`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all ${done ? 'bg-blue-500 shadow-lg shadow-blue-500/30' : 'bg-white/8 border border-white/10'}`}>
                         <Icon className={`h-4 w-4 ${done ? 'text-white' : 'text-slate-600'}`} />
                       </div>
                       <p className={`text-xs mt-2 text-center font-medium ${done ? 'text-slate-300' : 'text-slate-600'}`}>
@@ -200,7 +200,7 @@ export default function OrdersPage() {
               </div>
               <div className="flex justify-between pt-3">
                 <span className="text-slate-500">Amount to pay (Cash)</span>
-                <span className="text-emerald-400 font-bold text-base">₹{Number(selectedOrder.total_price).toFixed(2)}</span>
+                <span className="text-blue-400 font-bold text-base">₹{Number(selectedOrder.total_price).toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -231,7 +231,7 @@ function OrderCard({ order, onSelect }: { order: Order; onSelect: (o: Order) => 
         </div>
         <div className="text-right">
           <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-            order.status === 'delivered' ? 'bg-emerald-500/15 text-emerald-400' :
+            order.status === 'delivered' ? 'bg-blue-500/15 text-blue-400' :
             order.status === 'ready' ? 'bg-purple-500/15 text-purple-400' :
             order.status === 'printing' ? 'bg-blue-500/15 text-blue-400' :
             'bg-amber-500/15 text-amber-400'

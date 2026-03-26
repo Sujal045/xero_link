@@ -68,7 +68,7 @@ export default function OwnerOrderDetail() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
     )
   }
@@ -94,7 +94,7 @@ export default function OwnerOrderDetail() {
           <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
             order.status === 'ready'     ? 'bg-purple-500/15 text-purple-400' :
             order.status === 'printing'  ? 'bg-blue-500/15 text-blue-400' :
-            order.status === 'delivered' ? 'bg-emerald-500/15 text-emerald-400' :
+            order.status === 'delivered' ? 'bg-blue-500/15 text-blue-400' :
             'bg-amber-500/15 text-amber-400'
           }`}>
             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -111,8 +111,8 @@ export default function OwnerOrderDetail() {
 
         {/* Student Info */}
         <div className="rounded-2xl bg-white/4 border border-white/8 p-4 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-emerald-500/15 flex items-center justify-center shrink-0">
-            <User className="h-6 w-6 text-emerald-400" />
+          <div className="h-12 w-12 rounded-2xl bg-blue-500/15 flex items-center justify-center shrink-0">
+            <User className="h-6 w-6 text-blue-400" />
           </div>
           <div>
             <p className="font-semibold text-white">{order.users?.name ?? 'Unknown'}</p>
@@ -157,7 +157,7 @@ export default function OwnerOrderDetail() {
                   <p className="text-xs text-slate-500">{doc.page_count} pages</p>
                 </div>
                 <a href={doc.file_url} target="_blank" rel="noreferrer"
-                  className="shrink-0 flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
+                  className="shrink-0 flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors">
                   Open <ExternalLink className="h-3.5 w-3.5" />
                 </a>
               </div>
@@ -200,7 +200,7 @@ export default function OwnerOrderDetail() {
             )}
             {order.status === 'printing' && (
               <Button onClick={() => updateStatus('ready')} disabled={updating}
-                className="flex-1 h-13 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl text-base font-semibold">
+                className="flex-1 h-13 bg-blue-500 hover:bg-blue-400 text-white rounded-2xl text-base font-semibold">
                 {updating ? <Loader2 className="h-5 w-5 animate-spin" /> : <><PackageCheck className="mr-2 h-5 w-5" />Mark as Ready</>}
               </Button>
             )}

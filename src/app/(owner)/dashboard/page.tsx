@@ -193,7 +193,7 @@ export default function OwnerDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
     )
   }
@@ -203,8 +203,8 @@ export default function OwnerDashboard() {
       <div className="min-h-screen bg-slate-950 px-5 py-8">
         <div className="mx-auto max-w-xl rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
           <div className="mb-6 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15">
-              <Store className="h-8 w-8 text-emerald-400" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/15">
+              <Store className="h-8 w-8 text-blue-400" />
             </div>
             <h2 className="text-2xl font-bold text-white">Create your first shop</h2>
             <p className="mt-2 text-sm text-slate-400">
@@ -227,7 +227,7 @@ export default function OwnerDashboard() {
                 placeholder="Campus Print Hub"
                 required
                 disabled={creatingShop}
-                className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-emerald-500/50"
+                className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
               />
             </div>
 
@@ -242,7 +242,7 @@ export default function OwnerDashboard() {
                   placeholder="23.2156"
                   required
                   disabled={creatingShop}
-                  className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-emerald-500/50"
+                  className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
                 />
               </div>
               <div className="space-y-1">
@@ -255,7 +255,7 @@ export default function OwnerDashboard() {
                   placeholder="72.6369"
                   required
                   disabled={creatingShop}
-                  className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-emerald-500/50"
+                  className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
                 />
               </div>
             </div>
@@ -271,7 +271,7 @@ export default function OwnerDashboard() {
                   onChange={(e) => updateForm('priceBw', e.target.value)}
                   required
                   disabled={creatingShop}
-                  className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-emerald-500/50"
+                  className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
                 />
               </div>
               <div className="space-y-1">
@@ -284,7 +284,7 @@ export default function OwnerDashboard() {
                   onChange={(e) => updateForm('priceColor', e.target.value)}
                   required
                   disabled={creatingShop}
-                  className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-emerald-500/50"
+                  className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
                 />
               </div>
             </div>
@@ -292,7 +292,7 @@ export default function OwnerDashboard() {
             <Button
               type="submit"
               disabled={creatingShop}
-              className="h-12 w-full rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-400 hover:to-emerald-500"
+              className="h-12 w-full rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-400 hover:to-blue-500"
             >
               {creatingShop ? (
                 <>
@@ -313,7 +313,7 @@ export default function OwnerDashboard() {
     <div className="min-h-screen bg-slate-950">
       {/* New Order Alert Banner */}
       {newOrderAlert && (
-        <div className="fixed top-4 inset-x-4 z-50 flex items-center gap-3 rounded-2xl bg-emerald-500 px-5 py-4 shadow-2xl shadow-emerald-500/30 animate-in slide-in-from-top duration-300">
+        <div className="fixed top-4 inset-x-4 z-50 flex items-center gap-3 rounded-2xl bg-blue-500 px-5 py-4 shadow-2xl shadow-blue-500/30 animate-in slide-in-from-top duration-300">
           <Bell className="h-5 w-5 text-white shrink-0" />
           <p className="text-white font-semibold text-sm">New order received!</p>
         </div>
@@ -333,7 +333,7 @@ export default function OwnerDashboard() {
             disabled={toggling}
             className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border font-semibold text-sm transition-all duration-300 ${
               shop.is_open
-                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25'
+                ? 'bg-blue-500/15 border-blue-500/30 text-blue-400 hover:bg-blue-500/25'
                 : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
             }`}
           >
@@ -354,7 +354,7 @@ export default function OwnerDashboard() {
             { label: 'Pending',  value: pending,  color: 'text-amber-400',  bg: 'bg-amber-500/10' },
             { label: 'Printing', value: printing, color: 'text-blue-400',   bg: 'bg-blue-500/10' },
             { label: 'Ready',    value: ready,    color: 'text-purple-400', bg: 'bg-purple-500/10' },
-            { label: "Today ₹",  value: `${todayRevenue.toFixed(0)}`, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+            { label: "Today ₹",  value: `${todayRevenue.toFixed(0)}`, color: 'text-blue-400', bg: 'bg-blue-500/10' },
           ].map(stat => (
             <div key={stat.label} className={`rounded-2xl ${stat.bg} px-3 py-3 text-center`}>
               <p className={`text-lg font-bold ${stat.color}`}>{stat.value}</p>
@@ -505,7 +505,7 @@ function OrderCard({ order, onStatusChange }: {
           <button
             onClick={() => handleAction('ready')}
             disabled={updating}
-            className="flex-1 flex items-center justify-center gap-2 text-sm font-semibold py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/25 transition-all disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 text-sm font-semibold py-2 rounded-xl bg-blue-500/15 border border-blue-500/20 text-blue-400 hover:bg-blue-500/25 transition-all disabled:opacity-50"
           >
             {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <><PackageCheck className="h-4 w-4" /> Mark Ready</>}
           </button>
