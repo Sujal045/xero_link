@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft, MapPin, User, Phone,
-  CheckCircle2, Loader2, AlertCircle, IndianRupee, Printer
+  CheckCircle2, Loader2, AlertCircle, IndianRupee
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Suspense } from 'react'
@@ -28,7 +28,7 @@ function DeliverContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const orderId = searchParams.get('orderId')
-  const supabase = createClient()
+  const [supabase] = useState(createClient)
 
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
@@ -38,27 +38,46 @@ function DeliverContent() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!orderId) { router.push('/slot'); return }
-    supabase
-      .from('orders')
-      .select('*, users(name, phone), shops(shop_name)')
-      .eq('id', orderId)
-      .single()
-      .then(({ data }) => {
-        setOrder(data as Order)
-        if ((data as Order)?.otp_verified) setVerified(true)
-        setLoading(false)
-      })
-  }, [orderId])
+    const loadOrder = async () => {
+      if (!orderId) {
+        router.push('/slot')
+        return
+      }
+
+      const { data } = await supabase
+        .from('orders')
+        .select('*, users(name, phone), shops(shop_name)')
+        .eq('id', orderId)
+        .single()
+
+      setOrder(data as Order)
+      if ((data as Order)?.otp_verified) setVerified(true)
+      setLoading(false)
+    }
+
+    loadOrder()
+  }, [orderId, router, supabase])
 
   const handleVerify = async () => {
     if (otp.length < 4 || !orderId) return
     setVerifying(true)
     setError(null)
 
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (!session?.access_token) {
+      setError('Your session has expired. Please sign in again.')
+      setVerifying(false)
+      router.push('/login')
+      return
+    }
+
     const res = await fetch('/api/otp/verify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
       body: JSON.stringify({ orderId, enteredOtp: otp }),
     })
 

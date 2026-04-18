@@ -71,12 +71,10 @@ export default function OwnerDashboard() {
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-
-      // Check role
-      const { data: userData } = await supabase
-        .from('users').select('role').eq('id', user.id).maybeSingle()
-      if (userData?.role !== 'owner') { router.push('/shops'); return }
+      if (!user) {
+        setLoading(false)
+        return
+      }
 
       // Get shop owned by this user
       const { data: shopData } = await supabase

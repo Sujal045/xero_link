@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -16,20 +16,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Redirect already-authenticated users to their portal
-  useEffect(() => {
-    const check = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      const { data } = await supabase.from('users').select('role').eq('id', user.id).single()
-      const role = data?.role ?? user.user_metadata?.role ?? 'student'
-      if (role === 'owner') router.push('/dashboard')
-      else if (role === 'delivery') router.push('/slot')
-      else router.push('/shops')
-    }
-    check()
-  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,12 +45,16 @@ export default function LoginPage() {
       let finalRole = userData?.role
 
       if (!finalRole) {
-        // Try to recreate it using auth metadata stored during signup.
         const metadata = data.user?.user_metadata
-        if (metadata) {
+        const accessToken = data.session?.access_token
+
+        if (metadata && accessToken) {
           const res = await fetch('/api/users/create', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
             body: JSON.stringify({
               id: userId,
               name: metadata.name || 'User',

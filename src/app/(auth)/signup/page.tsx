@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -15,20 +15,6 @@ export default function SignupPage() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Redirect already-authenticated users away from signup
-  useEffect(() => {
-    const check = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      const { data } = await supabase.from('users').select('role').eq('id', user.id).single()
-      const role = data?.role ?? user.user_metadata?.role ?? 'student'
-      if (role === 'owner') router.push('/dashboard')
-      else if (role === 'delivery') router.push('/slot')
-      else router.push('/shops')
-    }
-    check()
-  }, [])
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -62,10 +48,21 @@ export default function SignupPage() {
       return
     }
 
+    const accessToken = authData.session?.access_token
+
+    if (!accessToken) {
+      setError('Account created. Verify your email, then sign in again to finish setting up your profile.')
+      setLoading(false)
+      return
+    }
+
     // 2. Create user profile via server API route (uses service role key → bypasses RLS)
     const res = await fetch('/api/users/create', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify({ id: authData.user.id, name, role, phone }),
     })
 

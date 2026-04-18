@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { calcWaitMinutes } from '@/lib/utils/waitTime'
@@ -21,7 +20,6 @@ interface Shop {
 }
 
 export default function ShopsPage() {
-  const router = useRouter()
   const supabase = createClient()
 
   const [shops, setShops] = useState<Shop[]>([])
@@ -32,7 +30,10 @@ export default function ShopsPage() {
   useEffect(() => {
     const init = async () => {
       const { data: { user: authUser } } = await supabase.auth.getUser()
-      if (!authUser) { router.push('/login'); return }
+      if (!authUser) {
+        setLoading(false)
+        return
+      }
 
       const { data: userData } = await supabase
         .from('users')
@@ -43,7 +44,7 @@ export default function ShopsPage() {
       setUserName(userData?.name ?? '')
 
       // Fetch shops filtered by university if available
-      let query = supabase.from('shops').select('*')
+      const query = supabase.from('shops').select('*')
       // if (userData?.university_id) {
       //   query = query.eq('university_id', userData.university_id)
       // }
@@ -76,7 +77,7 @@ export default function ShopsPage() {
       setLoading(false)
     }
     init()
-  }, [])
+  }, [supabase])
 
   const filtered = shops.filter(s =>
     s.shop_name.toLowerCase().includes(searchQuery.toLowerCase())

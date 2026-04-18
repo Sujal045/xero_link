@@ -1,12 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
   Package, Clock, MapPin, ChevronRight,
-  Truck, Loader2, RefreshCw, Printer
+  Truck, RefreshCw
 } from 'lucide-react'
 
 interface Order {
@@ -24,16 +23,12 @@ interface Order {
 }
 
 export default function SlotPage() {
-  const router = useRouter()
-  const supabase = createClient()
+  const [supabase] = useState(createClient)
 
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchOrders = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
-
     // For now show all 'ready' orders across all shops
     const { data } = await supabase
       .from('orders')
@@ -54,7 +49,7 @@ export default function SlotPage() {
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [])
+  }, [supabase])
 
   // Group orders by delivery slot
   const slots = orders.reduce<Record<string, Order[]>>((acc, o) => {

@@ -1,6 +1,9 @@
 import React from 'react'
+import { redirectAuthenticatedUser } from '@/lib/auth/server'
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  await redirectAuthenticatedUser()
+
   return (
     <div className="min-h-screen w-full relative overflow-hidden bg-slate-950 font-sans selection:bg-blue-500/30">
       {/* Dynamic Background Elements */}

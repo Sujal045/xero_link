@@ -42,7 +42,10 @@ export default function OrdersPage() {
 
   const fetchOrders = async () => {
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
+    if (!user) {
+      setLoading(false)
+      return
+    }
 
     const { data } = await supabase
       .from('orders')
