@@ -7,6 +7,15 @@ import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Printer, Loader2, ArrowRight } from 'lucide-react'
+import { getRoleHomePath } from '@/lib/auth/roles'
+import { z } from 'zod'
+
+const loginSchema = z.object({
+  email: z.string().trim().toLowerCase().email('Enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
+})
+
+type LoginField = 'email' | 'password'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -16,33 +25,45 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<LoginField, string[]>>>({})
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+
     setLoading(true)
     setError(null)
+    setFieldErrors({})
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const parsed = loginSchema.safeParse({ email, password })
+      if (!parsed.success) {
+        setFieldErrors(parsed.error.flatten().fieldErrors)
+        return
+      }
 
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
-    }
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: parsed.data.email,
+        password: parsed.data.password,
+      })
 
-    // Role-based redirect
-    const userId = data.user?.id
-    if (userId) {
-      const { data: userData } = await supabase
+      if (signInError) {
+        setError(signInError.message)
+        return
+      }
+
+      const userId = data.user?.id
+      if (!userId) {
+        setError('Login failed. Please try again.')
+        return
+      }
+
+      const { data: profile } = await supabase
         .from('users')
         .select('role')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
 
-      let finalRole = userData?.role
+      let finalRole = profile?.role
 
       if (!finalRole) {
         const metadata = data.user?.user_metadata
@@ -55,32 +76,23 @@ export default function LoginPage() {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${accessToken}`,
             },
-            body: JSON.stringify({
-              id: userId,
-              name: metadata.name || 'User',
-              role: metadata.role || 'student',
-              phone: metadata.phone || null
-            }),
           })
           if (res.ok) {
-            finalRole = metadata.role || 'student'
+            finalRole = metadata.role
           }
         }
       }
 
-      if (!finalRole) finalRole = 'student'
-
-      if (finalRole === 'student' || finalRole === 'faculty') {
-        router.push('/shops')
-      } else if (finalRole === 'owner') {
-        router.push('/dashboard')
-      } else if (finalRole === 'delivery') {
-        router.push('/slot')
-      } else {
-        router.push('/')
-      }
+      router.push(getRoleHomePath(finalRole ?? null))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setLoading(false)
     }
   }
+
+  const emailError = fieldErrors.email?.[0] ?? null
+  const passwordError = fieldErrors.password?.[0] ?? null
 
   return (
     <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
@@ -95,45 +107,53 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleLogin} className="space-y-5" noValidate>
           {error && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400 backdrop-blur-md transition-all">
+            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400 backdrop-blur-md">
               {error}
             </div>
           )}
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-300 uppercase tracking-wider ml-1">Email</label>
+            <label htmlFor="email" className="text-xs font-medium text-slate-300 uppercase tracking-wider ml-1">
+              Email
+            </label>
             <Input
+              id="email"
               type="email"
               placeholder="you@university.edu"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
               disabled={loading}
               className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
             />
+            {emailError && <p className="ml-1 text-xs text-red-400">{emailError}</p>}
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center justify-between ml-1">
-              <label className="text-xs font-medium text-slate-300 uppercase tracking-wider">Password</label>
-              <Link href="#" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Forgot?</Link>
+              <label htmlFor="password" className="text-xs font-medium text-slate-300 uppercase tracking-wider">
+                Password
+              </label>
+              <Link href="#" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                Forgot?
+              </Link>
             </div>
             <Input
+              id="password"
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
               disabled={loading}
               className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
             />
+            {passwordError && <p className="ml-1 text-xs text-red-400">{passwordError}</p>}
           </div>
 
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white shadow-blue-500/25 h-12 text-base rounded-xl mt-2 group" 
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white shadow-blue-500/25 h-12 text-base rounded-xl mt-2 group"
             disabled={loading}
           >
             {loading ? (
@@ -148,7 +168,7 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-8 text-center text-sm text-slate-400">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/signup" className="font-semibold text-blue-400 hover:text-blue-300 transition-colors">
             Create one
           </Link>
