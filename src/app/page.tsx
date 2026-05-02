@@ -431,10 +431,9 @@ export default function HomePage() {
     const init = async () => {
       const { data: { user: authUser } } = await supabase.auth.getUser()
       if (!authUser) { setChecked(true); return }
-      const { data } = await supabase.from('users').select('name, role').eq('id', authUser.id).single()
       setUser({
-        name: data?.name ?? authUser.user_metadata?.name ?? 'there',
-        role: (data?.role ?? authUser.user_metadata?.role ?? 'student') as Role,
+        name: authUser.user_metadata?.name ?? 'there',
+        role: (authUser.user_metadata?.role ?? 'student') as Role,
       })
       setChecked(true)
     }
@@ -482,7 +481,7 @@ export default function HomePage() {
           </div>
         ) : user ? (
           <>
-            {user.role === 'owner'    && <OwnerDashboard    name={user.name} />}
+            {user.role === 'owner' && <OwnerDashboard name={user.name} />}
             {user.role === 'delivery' && <DeliveryDashboard name={user.name} />}
             {(user.role === 'student' || !user.role) && <StudentDashboard name={user.name} />}
           </>
