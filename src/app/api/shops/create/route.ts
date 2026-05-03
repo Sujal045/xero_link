@@ -11,11 +11,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { shop_name, lat, lng, price_bw, price_color } = body
+    const { shop_name, price_bw, price_color } = body
 
-    if (!shop_name || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+    if (!shop_name) {
       return NextResponse.json(
-        { error: 'Missing required fields: shop_name, lat, lng' },
+        { error: 'Missing required fields: Shop Name' },
         { status: 400 }
       )
     }
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
-      .select('role, university_id')
+      .select('role')
       .eq('id', authData.user.id)
       .maybeSingle()
 
@@ -67,11 +67,8 @@ export async function POST(req: NextRequest) {
       .insert({
         owner_id: authData.user.id,
         shop_name: shop_name.trim(),
-        lat,
-        lng,
         price_bw,
         price_color,
-        university_id: userData.university_id ?? null,
       })
       .select('*')
       .single()

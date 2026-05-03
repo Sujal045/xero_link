@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
   ToggleLeft, ToggleRight, Clock,
-  ShoppingBag, Printer, PackageCheck, Loader2, Bell, Store
+  ShoppingBag, Printer, PackageCheck, Loader2, Store, RefreshCw
 } from 'lucide-react'
 
 interface Order {
@@ -39,6 +39,8 @@ interface ShopFormState {
   priceColor: string
 }
 
+const POLL_INTERVAL_MS = 10 * 60 * 1000 // 10 minutes
+
 export default function OwnerDashboard() {
   const router = useRouter()
   const [supabase] = useState(createClient)
@@ -47,7 +49,9 @@ export default function OwnerDashboard() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [toggling, setToggling] = useState(false)
-  const [newOrderAlert, setNewOrderAlert] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [creatingShop, setCreatingShop] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
   const [shopForm, setShopForm] = useState<ShopFormState>({
@@ -66,7 +70,24 @@ export default function OwnerDashboard() {
       .neq('status', 'delivered')
       .order('created_at', { ascending: true })
     setOrders((data as Order[]) || [])
+    setLastRefreshed(new Date())
   }, [supabase])
+
+  const startPolling = useCallback((shopId: string) => {
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    intervalRef.current = setInterval(() => {
+      fetchData(shopId)
+    }, POLL_INTERVAL_MS)
+  }, [fetchData])
+
+  // Manual refresh
+  const handleManualRefresh = useCallback(async () => {
+    if (!shop) return
+    setRefreshing(true)
+    await fetchData(shop.id)
+    startPolling(shop.id)
+    setRefreshing(false)
+  }, [shop, fetchData, startPolling])
 
   useEffect(() => {
     const init = async () => {
@@ -86,28 +107,15 @@ export default function OwnerDashboard() {
       }
       setShop(shopData)
       await fetchData(shopData.id)
+      startPolling(shopData.id)
       setLoading(false)
-
-      // Realtime subscription for new orders
-      const channel = supabase.channel('owner-orders')
-        .on('postgres_changes', {
-          event: 'INSERT', schema: 'public', table: 'orders',
-          filter: `shop_id=eq.${shopData.id}`
-        }, () => {
-          fetchData(shopData.id)
-          setNewOrderAlert(true)
-          setTimeout(() => setNewOrderAlert(false), 5000)
-        })
-        .on('postgres_changes', {
-          event: 'UPDATE', schema: 'public', table: 'orders',
-          filter: `shop_id=eq.${shopData.id}`
-        }, () => { fetchData(shopData.id) })
-        .subscribe()
-
-      return () => { supabase.removeChannel(channel) }
     }
     init()
-  }, [fetchData, router, supabase])
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [fetchData, startPolling, supabase])
 
   const toggleShop = async () => {
     if (!shop) return
@@ -146,8 +154,8 @@ export default function OwnerDashboard() {
       },
       body: JSON.stringify({
         shop_name: shopForm.shopName,
-        lat: Number(shopForm.lat),
-        lng: Number(shopForm.lng),
+        // lat: Number(shopForm.lat),
+        // lng: Number(shopForm.lng),
         price_bw: Number(shopForm.priceBw),
         price_color: Number(shopForm.priceColor),
       }),
@@ -231,35 +239,6 @@ export default function OwnerDashboard() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="ml-1 text-xs font-medium uppercase tracking-wider text-slate-300">Latitude</label>
-                <Input
-                  type="number"
-                  step="any"
-                  value={shopForm.lat}
-                  onChange={(e) => updateForm('lat', e.target.value)}
-                  placeholder="23.2156"
-                  required
-                  disabled={creatingShop}
-                  className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="ml-1 text-xs font-medium uppercase tracking-wider text-slate-300">Longitude</label>
-                <Input
-                  type="number"
-                  step="any"
-                  value={shopForm.lng}
-                  onChange={(e) => updateForm('lng', e.target.value)}
-                  placeholder="72.6369"
-                  required
-                  disabled={creatingShop}
-                  className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
                 <label className="ml-1 text-xs font-medium uppercase tracking-wider text-slate-300">B&W Price</label>
                 <Input
                   type="number"
@@ -309,13 +288,6 @@ export default function OwnerDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-950">
-      {/* New Order Alert Banner */}
-      {newOrderAlert && (
-        <div className="fixed top-4 inset-x-4 z-50 flex items-center gap-3 rounded-2xl bg-blue-500 px-5 py-4 shadow-2xl shadow-blue-500/30 animate-in slide-in-from-top duration-300">
-          <Bell className="h-5 w-5 text-white shrink-0" />
-          <p className="text-white font-semibold text-sm">New order received!</p>
-        </div>
-      )}
 
       {/* Header */}
       <header className="sticky top-0 z-10 px-5 pt-6 pb-4 bg-slate-950/90 backdrop-blur-xl border-b border-white/5">
@@ -323,27 +295,45 @@ export default function OwnerDashboard() {
           <div>
             <p className="text-xs text-slate-500 uppercase tracking-widest">Owner Dashboard</p>
             <h1 className="text-xl font-bold text-white mt-0.5">{shop.shop_name}</h1>
+            {lastRefreshed && (
+              <p className="text-xs text-slate-600 mt-0.5">
+                Updated {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            )}
           </div>
 
-          {/* Open/Close Toggle */}
-          <button
-            onClick={toggleShop}
-            disabled={toggling}
-            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border font-semibold text-sm transition-all duration-300 ${
-              shop.is_open
-                ? 'bg-blue-500/15 border-blue-500/30 text-blue-400 hover:bg-blue-500/25'
-                : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
-            }`}
-          >
-            {toggling ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : shop.is_open ? (
-              <ToggleRight className="h-5 w-5" />
-            ) : (
-              <ToggleLeft className="h-5 w-5" />
-            )}
-            {shop.is_open ? 'Open' : 'Closed'}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Manual Refresh Button */}
+            <button
+              onClick={handleManualRefresh}
+              disabled={refreshing}
+              title="Refresh orders (resets 10-min timer)"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all text-xs font-medium disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+
+            {/* Open/Close Toggle */}
+            <button
+              onClick={toggleShop}
+              disabled={toggling}
+              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border font-semibold text-sm transition-all duration-300 ${
+                shop.is_open
+                  ? 'bg-blue-500/15 border-blue-500/30 text-blue-400 hover:bg-blue-500/25'
+                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
+              }`}
+            >
+              {toggling ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : shop.is_open ? (
+                <ToggleRight className="h-5 w-5" />
+              ) : (
+                <ToggleLeft className="h-5 w-5" />
+              )}
+              {shop.is_open ? 'Open' : 'Closed'}
+            </button>
+          </div>
         </div>
 
         {/* Stats Row */}

@@ -37,17 +37,13 @@ export default function ShopsPage() {
 
       const { data: userData } = await supabase
         .from('users')
-        .select('name, university_id')
+        .select('name')
         .eq('id', authUser.id)
         .single()
 
       setUserName(userData?.name ?? '')
 
-      // Fetch shops filtered by university if available
       const query = supabase.from('shops').select('*')
-      // if (userData?.university_id) {
-      //   query = query.eq('university_id', userData.university_id)
-      // }
       const { data: shopsData } = await query
 
       if (shopsData && shopsData.length > 0) {
