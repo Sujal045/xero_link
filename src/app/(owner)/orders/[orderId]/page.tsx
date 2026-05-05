@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -28,7 +28,7 @@ export default function OwnerOrderDetail() {
   const router = useRouter()
   const params = useParams()
   const orderId = params.orderId as string
-  const supabase = createClient()
+  const [supabase] = useState(createClient)
 
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -36,8 +36,9 @@ export default function OwnerOrderDetail() {
   const [showRejectInput, setShowRejectInput] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [currentTime, setCurrentTime] = useState(() => Date.now())
 
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     const { data } = await supabase
       .from('orders')
       .select('*, users(name, phone), documents(*)')
@@ -45,9 +46,24 @@ export default function OwnerOrderDetail() {
       .single()
     setOrder(data as OrderDetail)
     setLoading(false)
-  }
+    setCurrentTime(Date.now())
+  }, [orderId, supabase])
 
-  useEffect(() => { fetchOrder() }, [orderId])
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void fetchOrder()
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [fetchOrder])
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCurrentTime(Date.now())
+    }, 60000)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
 
   const updateStatus = async (newStatus: string) => {
     setUpdating(true)
@@ -81,28 +97,42 @@ export default function OwnerOrderDetail() {
     )
   }
 
-  const age = Math.round((Date.now() - new Date(order.created_at).getTime()) / 60000)
+  const age = Math.round((currentTime - new Date(order.created_at).getTime()) / 60000)
+
+  const formatAge = (age: number): string => {
+    if (age < 60) {
+      return `${age} m ago`;
+    } else if (age < 1440) {
+      const hours = Math.floor(age / 60);
+      return `${hours} h ago`;
+    } else {
+      const days = Math.floor(age / 1440);
+      return `${days} day${days > 1 ? "s" : ""} ago`;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-32">
-      <header className="sticky top-0 z-10 px-5 pt-6 pb-4 bg-slate-950/90 backdrop-blur-xl border-b border-white/5">
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-400 hover:text-white mb-3 transition-colors">
-          <ArrowLeft className="h-4 w-4" /> <span className="text-sm">Dashboard</span>
-        </button>
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Order Detail</h1>
-          <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
-            order.status === 'ready'     ? 'bg-purple-500/15 text-purple-400' :
-            order.status === 'printing'  ? 'bg-blue-500/15 text-blue-400' :
-            order.status === 'delivered' ? 'bg-blue-500/15 text-blue-400' :
-            'bg-amber-500/15 text-amber-400'
-          }`}>
-            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-          </span>
+    <div className="min-h-screen bg-slate-950 pb-40">
+      <header className="sticky top-0 z-10 border-b border-white/5 bg-slate-950/90 backdrop-blur-xl">
+        <div className="mx-auto w-full max-w-7xl px-4 pt-6 pb-4 sm:px-6 lg:px-8">
+          <button onClick={() => router.back()} className="mb-3 flex items-center gap-2 text-slate-400 transition-colors hover:text-white">
+            <ArrowLeft className="h-4 w-4" /> <span className="text-sm">Dashboard</span>
+          </button>
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-xl font-bold">Order Detail</h1>
+            <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
+              order.status === 'ready'     ? 'bg-purple-500/15 text-purple-400' :
+              order.status === 'printing'  ? 'bg-blue-500/15 text-blue-400' :
+              order.status === 'delivered' ? 'bg-blue-500/15 text-blue-400' :
+              'bg-amber-500/15 text-amber-400'
+            }`}>
+              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+            </span>
+          </div>
         </div>
       </header>
 
-      <div className="px-5 py-5 space-y-4">
+      <div className="mx-auto w-full max-w-7xl px-4 py-5 space-y-4 sm:px-6 lg:px-8">
         {error && (
           <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
             <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" /> {error}
@@ -119,10 +149,10 @@ export default function OwnerOrderDetail() {
             <p className="text-xs text-slate-500 mt-0.5">{order.users?.phone ?? 'No phone'}</p>
           </div>
           <div className="ml-auto text-right">
-            <span className="flex items-center gap-1 text-xs text-slate-500">
-              <Clock className="h-3 w-3" /> {age}m ago
-            </span>
-            <p className="text-xs text-slate-500 mt-1">Slot: {order.delivery_slot}</p>
+          <span className="flex items-center gap-1 text-xs text-slate-500">
+            <Clock className="h-3 w-3" /> {formatAge(age)}
+          </span>
+            {/* <p className="text-xs text-slate-500 mt-1">Slot: {order.delivery_slot}</p> */}
           </div>
         </div>
 
@@ -162,7 +192,7 @@ export default function OwnerOrderDetail() {
                 </a>
               </div>
               {doc.file_url.endsWith('.pdf') && (
-                <div className="mt-3 rounded-xl overflow-hidden border border-white/8 bg-black/30 h-72">
+                <div className="mt-3 h-[70vh] min-h-[34rem] overflow-hidden rounded-xl border border-white/8 bg-black/30">
                   <iframe src={doc.file_url} className="w-full h-full" title={doc.file_name} />
                 </div>
               )}
@@ -173,43 +203,45 @@ export default function OwnerOrderDetail() {
 
       {/* Sticky Action Footer */}
       {(order.status === 'pending' || order.status === 'printing') && (
-        <div className="fixed bottom-0 inset-x-0 p-5 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent space-y-3">
-          {showRejectInput && (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Reason for rejection…"
-                value={rejectReason}
-                onChange={e => setRejectReason(e.target.value)}
-                className="flex-1 rounded-xl px-4 py-3 bg-white/6 border border-white/10 text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-red-500/50"
-              />
-              <button
-                onClick={async () => { await updateStatus('rejected'); setShowRejectInput(false) }}
-                className="px-4 py-3 rounded-xl bg-red-500/15 border border-red-500/20 text-red-400 text-sm font-semibold hover:bg-red-500/25 transition-all"
-              >
-                Confirm
-              </button>
+        <div className="fixed bottom-0 inset-x-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent">
+          <div className="mx-auto w-full max-w-7xl space-y-3 px-4 py-5 sm:px-6 lg:px-8">
+            {showRejectInput && (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Reason for rejection…"
+                  value={rejectReason}
+                  onChange={e => setRejectReason(e.target.value)}
+                  className="flex-1 rounded-xl px-4 py-3 bg-white/6 border border-white/10 text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-red-500/50"
+                />
+                <button
+                  onClick={async () => { await updateStatus('rejected'); setShowRejectInput(false) }}
+                  className="px-4 py-3 rounded-xl bg-red-500/15 border border-red-500/20 text-red-400 text-sm font-semibold hover:bg-red-500/25 transition-all"
+                >
+                  Confirm
+                </button>
+              </div>
+            )}
+            <div className="flex gap-3">
+              {order.status === 'pending' && (
+                <Button onClick={() => updateStatus('printing')} disabled={updating}
+                  className="flex-1 h-13 bg-blue-500 hover:bg-blue-400 text-white rounded-2xl text-base font-semibold">
+                  {updating ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Printer className="mr-2 h-5 w-5" />Start Printing</>}
+                </Button>
+              )}
+              {order.status === 'printing' && (
+                <Button onClick={() => updateStatus('ready')} disabled={updating}
+                  className="flex-1 h-13 bg-blue-500 hover:bg-blue-400 text-white rounded-2xl text-base font-semibold">
+                  {updating ? <Loader2 className="h-5 w-5 animate-spin" /> : <><PackageCheck className="mr-2 h-5 w-5" />Mark as Ready</>}
+                </Button>
+              )}
+              {!showRejectInput && (
+                <button onClick={() => setShowRejectInput(true)}
+                  className="px-5 py-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-semibold hover:bg-red-500/20 transition-all">
+                  Reject
+                </button>
+              )}
             </div>
-          )}
-          <div className="flex gap-3">
-            {order.status === 'pending' && (
-              <Button onClick={() => updateStatus('printing')} disabled={updating}
-                className="flex-1 h-13 bg-blue-500 hover:bg-blue-400 text-white rounded-2xl text-base font-semibold">
-                {updating ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Printer className="mr-2 h-5 w-5" />Start Printing</>}
-              </Button>
-            )}
-            {order.status === 'printing' && (
-              <Button onClick={() => updateStatus('ready')} disabled={updating}
-                className="flex-1 h-13 bg-blue-500 hover:bg-blue-400 text-white rounded-2xl text-base font-semibold">
-                {updating ? <Loader2 className="h-5 w-5 animate-spin" /> : <><PackageCheck className="mr-2 h-5 w-5" />Mark as Ready</>}
-              </Button>
-            )}
-            {!showRejectInput && (
-              <button onClick={() => setShowRejectInput(true)}
-                className="px-5 py-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-semibold hover:bg-red-500/20 transition-all">
-                Reject
-              </button>
-            )}
           </div>
         </div>
       )}
