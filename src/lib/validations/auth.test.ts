@@ -5,7 +5,7 @@ const VALID_DATA = {
   name: 'John Doe',
   email: 'john@example.com',
   password: 'Password1!',
-  phone: '+91 98765 43210',
+  phone: '9876543210',
   role: 'student' as const,
 }
 
@@ -53,20 +53,20 @@ describe('signupProfileSchema — name', () => {
 })
 
 describe('signupProfileSchema — phone', () => {
-  it('accepts a valid international phone with spaces', () => {
-    const result = signupProfileSchema.safeParse({ ...VALID_DATA, phone: '+91 98765 43210' })
+  it('accepts a plain local phone number', () => {
+    const result = signupProfileSchema.safeParse({ ...VALID_DATA, phone: '98765 43210' })
     expect(result.success).toBe(true)
-    if (result.success) expect(result.data.phone).toBe('+919876543210')
+    if (result.success) expect(result.data.phone).toBe('9876543210')
   })
 
-  it('normalizes phone by stripping spaces and dashes', () => {
+  it('accepts an international phone number with separators', () => {
     const result = signupProfileSchema.safeParse({ ...VALID_DATA, phone: '+1-800-555-0199' })
     expect(result.success).toBe(true)
     if (result.success) expect(result.data.phone).toBe('+18005550199')
   })
 
-  it('rejects a phone number without a + prefix', () => {
-    const result = signupProfileSchema.safeParse({ ...VALID_DATA, phone: '9876543210' })
+  it('rejects a phone number with invalid characters', () => {
+    const result = signupProfileSchema.safeParse({ ...VALID_DATA, phone: 'abc123' })
     expect(result.success).toBe(false)
     if (!result.success) {
       expect(result.error.flatten().fieldErrors.phone).toBeDefined()
@@ -74,7 +74,7 @@ describe('signupProfileSchema — phone', () => {
   })
 
   it('rejects a phone number that is too short after normalization', () => {
-    const result = signupProfileSchema.safeParse({ ...VALID_DATA, phone: '+123' })
+    const result = signupProfileSchema.safeParse({ ...VALID_DATA, phone: '98765' })
     expect(result.success).toBe(false)
   })
 

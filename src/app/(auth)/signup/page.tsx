@@ -162,7 +162,7 @@ export default function SignupPage() {
           {([
             { id: 'name', label: 'Full Name', type: 'text', placeholder: 'John Doe', value: name, onChange: setName, field: 'name' as SignupField },
             { id: 'email', label: 'Email', type: 'email', placeholder: 'you@university.edu', value: email, onChange: setEmail, field: 'email' as SignupField },
-            { id: 'phone', label: 'Phone Number', type: 'tel', placeholder: '+91 98765 43210', value: phone, onChange: setPhone, field: 'phone' as SignupField },
+            { id: 'phone', label: 'Phone Number', type: 'tel', placeholder: '9876543210', value: phone, onChange: setPhone, field: 'phone' as SignupField },
             { id: 'password', label: 'Password', type: 'password', placeholder: '••••••••', value: password, onChange: setPassword, field: 'password' as SignupField },
           ]).map(({ id, label, type, placeholder, value, onChange, field }) => {
             const fieldError = fieldErrors[field]?.[0] ?? null

@@ -3,6 +3,13 @@ import { z } from 'zod'
 const VALID_ROLES = ['student', 'owner', 'delivery'] as const
 
 const NAME_PATTERN = /^[\p{L}\s'\-]+$/u
+function normalizePhone(value: string) {
+  const trimmed = value.trim()
+  const hasPlus = trimmed.startsWith('+')
+  const digits = trimmed.replace(/\D/g, '')
+
+  return hasPlus ? `+${digits}` : digits
+}
 
 export const signupRoleSchema = z.enum(VALID_ROLES)
 
@@ -17,12 +24,10 @@ export const signupProfileSchema = z.object({
   phone: z
     .string()
     .trim()
-    .refine((value) => value.trim().startsWith('+'), {
-      message: 'Enter a valid international phone number (e.g. +91 98765 43210)',
-    })
-    .transform((value) => `+${value.replace(/\D/g, '')}`)
-    .refine((value) => /^\+\d{7,15}$/.test(value), {
-      message: 'Enter a valid international phone number (e.g. +91 98765 43210)',
+    .min(7, 'Enter a valid phone number')
+    .transform(normalizePhone)
+    .refine((value) => /^\+?\d{7,15}$/.test(value), {
+      message: 'Enter a valid phone number',
     }),
 })
 
