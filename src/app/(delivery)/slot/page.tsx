@@ -118,7 +118,7 @@ export default function SlotPage() {
                             <Truck className="h-5 w-5 text-purple-400" />
                           </div>
                           <div className="min-w-0">
-                            <p className="font-semibold text-white truncate">{order.users?.name ?? 'Student'}</p>
+                            <p className="font-semibold text-white truncate">{order.users?.name ?? 'User'}</p>
                             <p className="text-xs text-slate-500 mt-0.5 truncate">
                               From: {order.shops?.shop_name ?? 'Shop'}
                             </p>

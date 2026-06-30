@@ -18,6 +18,7 @@ interface Order {
   otp: string
   otp_verified: boolean
   delivery_slot: string
+  delivery_address: string | null
   created_at: string
   shops: { shop_name: string } | null
 }
@@ -198,8 +199,8 @@ export default function OrdersPage() {
                 <span className="text-white">{selectedOrder.delivery_slot}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-white/5 items-center">
-                <span className="text-slate-500 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Pickup</span>
-                <span className="text-white">Campus Pickup Spot</span>
+                <span className="text-slate-500 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Delivery Address</span>
+                <span className="text-white text-right">{selectedOrder.delivery_address || 'Address not provided'}</span>
               </div>
               <div className="flex justify-between pt-3">
                 <span className="text-slate-500">Amount to pay (Cash)</span>

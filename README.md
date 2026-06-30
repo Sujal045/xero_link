@@ -1,16 +1,16 @@
 # XeroLink
 
-A print-on-demand platform that connects students with print shops and delivery partners.
+A print-on-demand platform that connects users with print shops and delivery partners.
 
 ## What it does
 
-Students upload documents, choose a print shop, and get their prints delivered home. Shop owners manage the print queue in real-time. Delivery partners collect and deliver orders, verified via OTP.
+Users upload documents, choose a print shop, and get their prints delivered home. Shop owners manage the print queue in real-time. Delivery partners collect and deliver orders, verified via OTP.
 
 ## Roles
 
 | Role | Portal | Entry |
 |---|---|---|
-| Student | `/shops`, `/orders` | Browse shops, place & track orders |
+| User | `/shops`, `/orders` | Browse shops, place & track orders |
 | Shop Owner | `/dashboard` | Manage queue, toggle open/close |
 | Delivery Boy | `/slot`, `/deliver` | View ready orders, verify OTP |
 
@@ -45,5 +45,5 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 - Live price calculator (B&W / colour, single / double sided)
 - Real-time order tracking via Supabase Realtime
 - OTP-based delivery verification
-- Role-aware home page (guest / student / owner / delivery)
+- Role-aware home page (guest / user / owner / delivery)
 - Shop open/close toggle with live queue

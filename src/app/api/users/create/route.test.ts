@@ -28,7 +28,7 @@ const VALID_USER = {
   id: 'user-123',
   user_metadata: {
     name: 'Jane Doe',
-    role: 'student',
+    role: 'user',
     phone: '+91 98765 43210',
   },
 }
@@ -69,7 +69,7 @@ describe('POST /api/users/create', () => {
       expect(await res.json()).toEqual({ success: true })
       expect(mockFrom).toHaveBeenCalledWith('users')
       expect(mockInsert).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'user-123', name: 'Jane Doe', role: 'student' })
+        expect.objectContaining({ id: 'user-123', name: 'Jane Doe', role: 'user' })
       )
     })
 

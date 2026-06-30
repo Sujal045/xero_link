@@ -12,12 +12,12 @@ import {
   Upload, MapPin, Phone, Users, TrendingUp
 } from 'lucide-react'
 
-type Role = 'student' | 'owner' | 'delivery' | null
+type Role = 'user' | 'owner' | 'delivery' | null
 interface UserState { name: string; role: Role }
 
-// ─── Student Dashboard ────────────────────────────────────────────────────
+// ─── User Dashboard ───────────────────────────────────────────────────────
 
-function StudentDashboard({ name }: { name: string }) {
+function UserDashboard({ name }: { name: string }) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Greeting */}
@@ -140,11 +140,11 @@ function OwnerDashboard({ name }: { name: string }) {
         <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3 px-1">What You Can Do</h3>
         <div className="space-y-2">
           {[
-            { icon: <Zap className="h-4 w-4 text-blue-400" />, title: 'Instant Notifications', desc: 'Get alerted the moment a student places an order' },
+            { icon: <Zap className="h-4 w-4 text-blue-400" />, title: 'Instant Notifications', desc: 'Get alerted the moment a user places an order' },
             { icon: <FileText className="h-4 w-4 text-blue-400" />, title: 'Document Preview', desc: 'View uploaded PDFs before printing them' },
             { icon: <CheckCircle2 className="h-4 w-4 text-blue-400" />, title: 'Status Control', desc: 'Move orders: Pending → Printing → Ready with one tap' },
             { icon: <BarChart3 className="h-4 w-4 text-blue-400" />, title: 'Revenue Tracking', desc: "See today's earnings on your dashboard" },
-            { icon: <Shield className="h-4 w-4 text-blue-400" />, title: 'Shop Visibility', desc: 'Toggle open/closed so students only see you when you\'re ready' },
+            { icon: <Shield className="h-4 w-4 text-blue-400" />, title: 'Shop Visibility', desc: 'Toggle open/closed so users only see you when you\'re ready' },
           ].map(f => (
             <div key={f.title} className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/3 p-4">
               <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">{f.icon}</div>
@@ -164,7 +164,7 @@ function OwnerDashboard({ name }: { name: string }) {
           'Set your shop as Closed during breaks to pause new orders',
           'Tap "View Doc" on any order card to preview before printing',
           'Mark orders Ready as soon as printed — delivery is waiting!',
-          'Reject orders politely with a reason so students can resubmit',
+          'Reject orders politely with a reason so users can resubmit',
         ].map((tip, i) => (
           <div key={i} className="flex items-start gap-2.5">
             <Star className="h-3.5 w-3.5 text-blue-400 shrink-0 mt-0.5" />
@@ -198,7 +198,7 @@ function DeliveryDashboard({ name }: { name: string }) {
         <div className="space-y-2">
           {[
             { href: '/slot', icon: <Truck className="h-5 w-5 text-blue-400" />, label: 'Slot Orders', sub: 'All orders ready for pickup & delivery' },
-            { href: '/deliver', icon: <CheckCircle2 className="h-5 w-5 text-blue-400" />, label: 'Verify Delivery', sub: 'Enter student OTP to confirm handoff' },
+            { href: '/deliver', icon: <CheckCircle2 className="h-5 w-5 text-blue-400" />, label: 'Verify Delivery', sub: 'Enter user OTP to confirm handoff' },
           ].map(a => (
             <Link key={a.href} href={a.href}
               className="flex items-center justify-between rounded-2xl border border-blue-500/20 bg-blue-500/10 p-4 hover:bg-blue-500/20 transition-all">
@@ -222,9 +222,9 @@ function DeliveryDashboard({ name }: { name: string }) {
           {[
             { step: '01', icon: <Clock className="h-4 w-4" />, title: 'Check Slot Orders', desc: 'See all orders grouped by time slot (12 PM / 5 PM)' },
             { step: '02', icon: <ShoppingBag className="h-4 w-4" />, title: 'Pick Up from Shop', desc: 'Collect printed documents from the listed shop' },
-            { step: '03', icon: <MapPin className="h-4 w-4" />, title: 'Navigate to Student', desc: 'Use the delivery address shown on each order card' },
-            { step: '04', icon: <Phone className="h-4 w-4" />, title: 'Contact if Needed', desc: 'Student phone number is shown — call when nearby' },
-            { step: '05', icon: <Shield className="h-4 w-4" />, title: 'Verify OTP', desc: 'Ask the student for their 6-digit OTP to confirm handoff' },
+            { step: '03', icon: <MapPin className="h-4 w-4" />, title: 'Navigate to User', desc: 'Use the delivery address shown on each order card' },
+            { step: '04', icon: <Phone className="h-4 w-4" />, title: 'Contact if Needed', desc: 'User phone number is shown — call when nearby' },
+            { step: '05', icon: <Shield className="h-4 w-4" />, title: 'Verify OTP', desc: 'Ask the user for their 6-digit OTP to confirm handoff' },
             { step: '06', icon: <IndianRupee className="h-4 w-4" />, title: 'Collect Cash', desc: 'Collect the order amount shown on the screen' },
           ].map(s => (
             <div key={s.step} className="flex items-start gap-4 rounded-2xl border border-white/6 bg-white/3 p-4">
@@ -249,7 +249,7 @@ function DeliveryDashboard({ name }: { name: string }) {
         {[
           'Check the slot list at 11:30 AM and 4:30 PM for fresh orders',
           'Collect all orders for a slot before starting deliveries',
-          'OTP must be entered correctly — this protects the student',
+          'OTP must be entered correctly — this protects the user',
           'Cash is collected on delivery — no prepayment needed',
         ].map((tip, i) => (
           <div key={i} className="flex items-start gap-2.5">
@@ -316,9 +316,9 @@ function GuestLanding() {
           {[
             {
               icon: <ShoppingBag className="h-6 w-6 text-blue-400" />,
-              role: 'Students',
+              role: 'Users',
               desc: 'Upload documents, place orders, and get prints delivered to your address. Track status live and use your OTP for secure handoff.',
-              cta: 'Sign up as student', href: '/signup',
+              cta: 'Sign up as user', href: '/signup',
             },
             {
               icon: <Building2 className="h-6 w-6 text-blue-400" />,
@@ -329,7 +329,7 @@ function GuestLanding() {
             {
               icon: <Truck className="h-6 w-6 text-blue-400" />,
               role: 'Delivery Boys',
-              desc: 'View slot-grouped orders, get student addresses, verify OTPs and collect cash at the door. Simple, fast, no paperwork.',
+              desc: 'View slot-grouped orders, get user addresses, verify OTPs and collect cash at the door. Simple, fast, no paperwork.',
               cta: 'Join as delivery partner', href: '/signup',
             },
           ].map(r => (
@@ -380,7 +380,7 @@ function GuestLanding() {
           <div className="absolute left-4 top-4 bottom-4 w-px bg-gradient-to-b from-blue-500 to-transparent" />
           <div className="space-y-4 pl-10">
             {[
-              { n: 1, title: 'Sign up & choose a shop', desc: 'Create your account as a student, then browse nearby open print shops' },
+              { n: 1, title: 'Sign up & choose a shop', desc: 'Create your account as a user, then browse nearby open print shops' },
               { n: 2, title: 'Upload & configure', desc: 'Drop in your file, pick B&W or colour, single or double sided, and set your copy count' },
               { n: 3, title: 'Add your delivery address', desc: 'Enter where you want your prints delivered — anywhere works' },
               { n: 4, title: 'Track, receive & pay', desc: 'Watch your job go from printed → delivered. Verify with your OTP and pay cash on delivery' },
@@ -433,7 +433,7 @@ export default function HomePage() {
       if (!authUser) { setChecked(true); return }
       setUser({
         name: authUser.user_metadata?.name ?? 'there',
-        role: (authUser.user_metadata?.role ?? 'student') as Role,
+        role: (authUser.user_metadata?.role ?? 'user') as Role,
       })
       setChecked(true)
     }
@@ -483,7 +483,7 @@ export default function HomePage() {
           <>
             {user.role === 'owner' && <OwnerDashboard name={user.name} />}
             {user.role === 'delivery' && <DeliveryDashboard name={user.name} />}
-            {(user.role === 'student' || !user.role) && <StudentDashboard name={user.name} />}
+            {(user.role === 'user' || !user.role) && <UserDashboard name={user.name} />}
           </>
         ) : (
           <GuestLanding />

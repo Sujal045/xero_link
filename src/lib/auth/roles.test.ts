@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { getRoleHomePath } from '@/lib/auth/roles'
 
 describe('getRoleHomePath', () => {
-  it('returns /shops for student', () => {
-    expect(getRoleHomePath('student')).toBe('/shops')
+  it('returns /shops for user', () => {
+    expect(getRoleHomePath('user')).toBe('/shops')
   })
 
   it('returns /dashboard for owner', () => {

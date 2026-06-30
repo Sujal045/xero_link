@@ -139,7 +139,7 @@ export default function OwnerOrderDetail() {
           </div>
         )}
 
-        {/* Student Info */}
+        {/* User Info */}
         <div className="rounded-2xl bg-white/4 border border-white/8 p-4 flex items-center gap-4">
           <div className="h-12 w-12 rounded-2xl bg-blue-500/15 flex items-center justify-center shrink-0">
             <User className="h-6 w-6 text-blue-400" />

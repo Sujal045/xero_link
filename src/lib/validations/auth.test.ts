@@ -6,11 +6,11 @@ const VALID_DATA = {
   email: 'john@example.com',
   password: 'Password1!',
   phone: '9876543210',
-  role: 'student' as const,
+  role: 'user' as const,
 }
 
 describe('signupRoleSchema', () => {
-  it.each(['student', 'owner', 'delivery'])('accepts valid role: %s', (role) => {
+  it.each(['user', 'owner', 'delivery'])('accepts valid role: %s', (role) => {
     expect(signupRoleSchema.safeParse(role).success).toBe(true)
   })
 

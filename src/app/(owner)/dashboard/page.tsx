@@ -230,7 +230,7 @@ export default function OwnerDashboard() {
               <Input
                 value={shopForm.shopName}
                 onChange={(e) => updateForm('shopName', e.target.value)}
-                placeholder="Campus Print Hub"
+                placeholder="Quick Print Hub"
                 required
                 disabled={creatingShop}
                 className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
@@ -434,7 +434,7 @@ function OrderCard({ order, onStatusChange }: {
             <Printer className="h-5 w-5 text-slate-400" />
           </div>
           <div>
-            <p className="font-semibold text-white">{order.users?.name ?? 'Student'}</p>
+            <p className="font-semibold text-white">{order.users?.name ?? 'User'}</p>
             <div className="flex items-center gap-2 mt-0.5">
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[order.status] ?? 'bg-slate-700 text-slate-400'}`}>
                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}

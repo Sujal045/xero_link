@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const VALID_ROLES = ['student', 'owner', 'delivery'] as const
+const VALID_ROLES = ['user', 'owner', 'delivery'] as const
 
 const NAME_PATTERN = /^[\p{L}\s'\-]+$/u
 function normalizePhone(value: string) {

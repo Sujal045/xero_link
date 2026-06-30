@@ -25,7 +25,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [phone, setPhone] = useState('')
-  const [role, setRole] = useState<'student' | 'owner' | 'delivery'>('student')
+  const [role, setRole] = useState<'user' | 'owner' | 'delivery'>('user')
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,7 +83,7 @@ export default function SignupPage() {
       }
 
       const roleRedirects: Record<typeof formData.role, string> = {
-        student: '/shops',
+        user: '/shops',
         delivery: '/slot',
         owner: '/dashboard',
       }
@@ -138,7 +138,7 @@ export default function SignupPage() {
 
           <div className="grid grid-cols-3 gap-2 mb-2">
             {([
-              { value: 'student', label: 'Student', Icon: User },
+              { value: 'user', label: 'User', Icon: User },
               { value: 'owner', label: 'Shop Owner', Icon: Building2 },
               { value: 'delivery', label: 'Delivery', Icon: Truck },
             ] as const).map(({ value, label, Icon }) => (
@@ -161,7 +161,7 @@ export default function SignupPage() {
 
           {([
             { id: 'name', label: 'Full Name', type: 'text', placeholder: 'John Doe', value: name, onChange: setName, field: 'name' as SignupField },
-            { id: 'email', label: 'Email', type: 'email', placeholder: 'you@university.edu', value: email, onChange: setEmail, field: 'email' as SignupField },
+            { id: 'email', label: 'Email', type: 'email', placeholder: 'you@example.com', value: email, onChange: setEmail, field: 'email' as SignupField },
             { id: 'phone', label: 'Phone Number', type: 'tel', placeholder: '9876543210', value: phone, onChange: setPhone, field: 'phone' as SignupField },
             { id: 'password', label: 'Password', type: 'password', placeholder: '••••••••', value: password, onChange: setPassword, field: 'password' as SignupField },
           ]).map(({ id, label, type, placeholder, value, onChange, field }) => {

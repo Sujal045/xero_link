@@ -130,7 +130,7 @@ function DeliverContent() {
               <p className="text-slate-400 mt-1">OTP verified successfully</p>
             </div>
             <div className="rounded-2xl bg-blue-500/10 border border-blue-500/20 px-8 py-5 w-full">
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Collect from student</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Collect from user</p>
               <p className="text-3xl font-bold text-blue-400">₹{Number(order.total_price).toFixed(2)}</p>
             </div>
             <Button onClick={() => router.push('/slot')}
@@ -140,9 +140,9 @@ function DeliverContent() {
           </div>
         ) : (
           <>
-            {/* Student Info */}
+            {/* User Info */}
             <div className="rounded-2xl bg-white/4 border border-white/8 p-4 space-y-3">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Student</h2>
+              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">User</h2>
               <div className="flex items-center gap-3">
                 <div className="h-11 w-11 rounded-xl bg-blue-500/15 flex items-center justify-center shrink-0">
                   <User className="h-5 w-5 text-blue-400" />
@@ -189,7 +189,7 @@ function DeliverContent() {
 
             {/* OTP Input */}
             <div className="rounded-2xl bg-white/4 border border-white/8 p-5">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Verify OTP from Student</h2>
+              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Verify OTP from User</h2>
               <div className="flex gap-2 mb-2">
                 {[0,1,2,3,4,5].map(i => (
                   <div key={i} className={`flex-1 h-12 rounded-xl flex items-center justify-center text-xl font-bold border transition-all ${

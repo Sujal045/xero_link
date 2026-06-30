@@ -78,16 +78,16 @@ export async function POST(req: NextRequest) {
 
     // Supabase join may return array or object — handle both
     const usersField = order.users
-    let studentName = 'Student'
+    let userName = 'User'
     if (Array.isArray(usersField) && usersField.length > 0) {
-      studentName = (usersField[0] as { name: string }).name ?? 'Student'
+      userName = (usersField[0] as { name: string }).name ?? 'User'
     } else if (usersField && typeof usersField === 'object' && 'name' in usersField) {
-      studentName = (usersField as { name: string }).name ?? 'Student'
+      userName = (usersField as { name: string }).name ?? 'User'
     }
 
     return NextResponse.json({
       success: true,
-      studentName,
+      userName,
       amount: order.total_price,
     })
   } catch {

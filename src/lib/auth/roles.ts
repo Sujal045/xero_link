@@ -1,4 +1,4 @@
-export type AppRole = 'student' | 'owner' | 'delivery'
+export type AppRole = 'user' | 'owner' | 'delivery'
 
 export function getRoleHomePath(role: AppRole | null | undefined) {
   if (role === 'owner') {

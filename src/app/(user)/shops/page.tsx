@@ -88,7 +88,7 @@ export default function ShopsPage() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Welcome back</p>
-            <h1 className="text-xl font-bold text-white">{userName || 'Student'}</h1>
+            <h1 className="text-xl font-bold text-white">{userName || 'User'}</h1>
           </div>
           <Link href="/orders">
             <div className="flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2 border border-white/10 hover:bg-white/10 transition-colors">
@@ -136,7 +136,7 @@ export default function ShopsPage() {
             <Printer className="h-14 w-14 text-slate-700 mb-4" />
             <p className="text-slate-300 font-semibold text-lg">No shops found</p>
             <p className="text-slate-500 text-sm mt-1">
-              {searchQuery ? 'Try a different search term' : 'No shops near your university yet'}
+              {searchQuery ? 'Try a different search term' : 'No shops near you'}
             </p>
           </div>
         ) : (
@@ -164,10 +164,10 @@ export default function ShopsPage() {
                           </div>
 
                           <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                            <span className="flex items-center gap-1 text-xs text-slate-400">
+                            {/* <span className="flex items-center gap-1 text-xs text-slate-400">
                               <Clock className="h-3 w-3 shrink-0" />
                               {waitMin === 0 ? 'No queue' : `~${waitMin} min wait`}
-                            </span>
+                            </span> */}
                             <span className="flex items-center gap-1 text-xs text-slate-400">
                               <Star className="h-3 w-3 fill-amber-400 text-amber-400 shrink-0" />
                               {Number(shop.rating).toFixed(1)}
