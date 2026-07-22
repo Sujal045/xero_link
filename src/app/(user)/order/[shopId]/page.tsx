@@ -10,6 +10,10 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import {
+  DeliveryAddressPicker,
+  type DeliveryLocationValue,
+} from '@/components/map/DeliveryAddressPicker'
+import {
   UploadCloud, FileText, Loader2,
   CheckCircle2, AlertCircle,
 } from 'lucide-react'
@@ -22,6 +26,8 @@ interface Shop {
   avg_print_time_sec: number
   rating: number
   is_open: boolean
+  lat: number | null
+  lng: number | null
 }
 
 type PrintType = 'bw' | 'color'
@@ -43,7 +49,7 @@ export default function OrderPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
-  const [deliveryAddress, setDeliveryAddress] = useState('')
+  const [deliveryLocation, setDeliveryLocation] = useState<DeliveryLocationValue | null>(null)
 
   useEffect(() => {
     supabase.from('shops').select('*').eq('id', shopId).single()
@@ -81,7 +87,7 @@ export default function OrderPage() {
     : 0
 
   const handleSubmit = async () => {
-    if (!shop || !file || pageCount === 0 || !deliveryAddress.trim()) return
+    if (!shop || !file || pageCount === 0 || !deliveryLocation) return
     setSubmitting(true)
     setError(null)
 
@@ -107,11 +113,19 @@ export default function OrderPage() {
       total_price: price,
       otp,
       delivery_slot: slot,
-      delivery_address: deliveryAddress.trim(),
+      delivery_address: deliveryLocation.address.trim(),
+      delivery_lat: deliveryLocation.lat,
+      delivery_lng: deliveryLocation.lng,
     }).select().single()
 
     if (orderErr || !order) {
-      setError(orderErr?.message ?? 'Failed to create order')
+      const hint =
+        orderErr?.message &&
+        (/column .* does not exist/i.test(orderErr.message) ||
+          /Could not find the .* column/i.test(orderErr.message))
+          ? ' Run the delivery destination migration (delivery_lat / delivery_lng).'
+          : ''
+      setError((orderErr?.message ?? 'Failed to create order') + hint)
       setSubmitting(false)
       return
     }
@@ -280,12 +294,15 @@ export default function OrderPage() {
         <div>
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Delivery Address</h2>
           <Card>
-            <textarea
-              rows={3}
-              placeholder="Enter your full delivery address (house no., street, area, city…)"
-              value={deliveryAddress}
-              onChange={e => setDeliveryAddress(e.target.value)}
-              className="w-full bg-transparent text-foreground placeholder:text-subtle text-sm resize-none focus:outline-none"
+            <DeliveryAddressPicker
+              value={deliveryLocation}
+              onChange={setDeliveryLocation}
+              disabled={submitting}
+              near={
+                shop.lat != null && shop.lng != null
+                  ? { lat: Number(shop.lat), lng: Number(shop.lng) }
+                  : null
+              }
             />
           </Card>
         </div>
@@ -329,7 +346,7 @@ export default function OrderPage() {
           <Button
             size="lg"
             onClick={handleSubmit}
-            disabled={!file || pageCount === 0 || detecting || submitting || !shop.is_open || !deliveryAddress.trim()}
+            disabled={!file || pageCount === 0 || detecting || submitting || !shop.is_open || !deliveryLocation}
             className="w-full h-14 text-base rounded-2xl shadow-elevated disabled:opacity-40"
           >
             {submitting ? (

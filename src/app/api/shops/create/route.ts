@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isValidLatLng } from '@/lib/maps/reverseGeocode'
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { shop_name, price_bw, price_color } = body
+    const { shop_name, price_bw, price_color, lat, lng, address } = body
 
     if (!shop_name) {
       return NextResponse.json(
@@ -23,6 +24,21 @@ export async function POST(req: NextRequest) {
     if (!Number.isFinite(price_bw) || price_bw < 0 || !Number.isFinite(price_color) || price_color < 0) {
       return NextResponse.json(
         { error: 'Price values must be valid non-negative numbers.' },
+        { status: 400 }
+      )
+    }
+
+    if (!isValidLatLng(lat, lng)) {
+      return NextResponse.json(
+        { error: 'Pin your shop on the map before creating it.' },
+        { status: 400 }
+      )
+    }
+
+    const trimmedAddress = typeof address === 'string' ? address.trim() : ''
+    if (!trimmedAddress) {
+      return NextResponse.json(
+        { error: 'Shop address is required. Pin a location so the address can be fetched.' },
         { status: 400 }
       )
     }
@@ -69,12 +85,20 @@ export async function POST(req: NextRequest) {
         shop_name: shop_name.trim(),
         price_bw,
         price_color,
+        lat,
+        lng,
+        address: trimmedAddress,
       })
       .select('*')
       .single()
 
     if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 500 })
+      const hint =
+        /column .* does not exist/i.test(insertError.message) ||
+        /Could not find the .* column/i.test(insertError.message)
+          ? ' Ensure shops lat/lng/address columns exist (run shop location migration).'
+          : ''
+      return NextResponse.json({ error: insertError.message + hint }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, shop }, { status: 201 })

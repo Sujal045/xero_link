@@ -237,9 +237,11 @@ export default function SlotPage() {
                                 <p className="font-semibold text-foreground truncate">
                                   {order.users?.name ?? 'User'}
                                 </p>
-                                {unassigned && (
+                                {unassigned ? (
                                   <Badge variant="warning">Unassigned</Badge>
-                                )}
+                                ) : order.status === 'out_for_delivery' ? (
+                                  <Badge variant="out_for_delivery">Out for Delivery</Badge>
+                                ) : null}
                               </div>
                               <p className="text-xs text-muted-foreground mt-0.5 truncate">
                                 From: {order.shops?.shop_name ?? 'Shop'}

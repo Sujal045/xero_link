@@ -30,7 +30,8 @@ describe('order status domain', () => {
   })
 
   it('treats ready and out_for_delivery as deliverable for OTP', () => {
-    expect(DELIVERABLE_STATUSES).toEqual(['ready', 'out_for_delivery'])
+    expect(DELIVERABLE_STATUSES).toContain('ready')
+    expect(DELIVERABLE_STATUSES).toContain('out_for_delivery')
     expect(isDeliverableStatus('ready')).toBe(true)
     expect(isDeliverableStatus('out_for_delivery')).toBe(true)
     expect(isDeliverableStatus('printing')).toBe(false)

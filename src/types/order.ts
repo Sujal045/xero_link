@@ -37,10 +37,11 @@ export const STATUS_LABELS: Record<OrderStatus, string> = {
   rejected: 'Rejected',
 }
 
-/** Statuses from which OTP delivery handoff is allowed. */
+/** Statuses from which OTP delivery handoff is allowed.
+ * Prefer out_for_delivery; ready kept for backward compatibility. */
 export const DELIVERABLE_STATUSES: readonly OrderStatus[] = [
-  'ready',
   'out_for_delivery',
+  'ready',
 ] as const
 
 export function isOrderStatus(value: unknown): value is OrderStatus {

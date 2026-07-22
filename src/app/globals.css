@@ -130,3 +130,54 @@
     box-shadow: var(--shadow-lg);
   }
 }
+
+/* Leaflet shop pin (OSM map picker) */
+.xerolink-leaflet-pin {
+  background: transparent !important;
+  border: none !important;
+}
+
+.xerolink-leaflet-pin__dot {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 5px auto 0;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--accent);
+  border: 2px solid var(--accent-hover);
+  box-shadow: 0 1px 4px rgb(15 23 42 / 0.28);
+}
+
+/* Browse-shops markers */
+.xerolink-shop-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.xerolink-shop-marker__dot {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 5px auto 0;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 1px 4px rgb(15 23 42 / 0.28);
+  border: 2px solid white;
+}
+
+.xerolink-shop-marker.is-open .xerolink-shop-marker__dot {
+  background: var(--success);
+}
+
+.xerolink-shop-marker.is-closed .xerolink-shop-marker__dot {
+  background: var(--subtle);
+}
+
+.xerolink-shop-marker.is-selected .xerolink-shop-marker__dot {
+  width: 22px;
+  height: 22px;
+  margin-top: 3px;
+  border-width: 3px;
+  border-color: var(--accent);
+}

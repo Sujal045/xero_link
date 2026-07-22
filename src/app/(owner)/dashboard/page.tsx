@@ -12,6 +12,10 @@ import { AppShell, AppContainer, PageHeader } from '@/components/layout'
 import { fetchShopActiveOrders } from '@/lib/orders/fetchShopOrders'
 import { getOrderAgeLabel } from '@/lib/utils/orderAge'
 import {
+  ShopLocationPicker,
+  type ShopLocationValue,
+} from '@/components/map/ShopLocationPicker'
+import {
   ToggleLeft, ToggleRight, Clock,
   ShoppingBag, Printer, PackageCheck, Loader2, Store, RefreshCw, UserPlus
 } from 'lucide-react'
@@ -40,8 +44,6 @@ interface Shop {
 
 interface ShopFormState {
   shopName: string
-  lat: string
-  lng: string
   priceBw: string
   priceColor: string
 }
@@ -62,10 +64,9 @@ export default function OwnerDashboard() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [creatingShop, setCreatingShop] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
+  const [shopLocation, setShopLocation] = useState<ShopLocationValue | null>(null)
   const [shopForm, setShopForm] = useState<ShopFormState>({
     shopName: '',
-    lat: '',
-    lng: '',
     priceBw: '1',
     priceColor: '5',
   })
@@ -166,6 +167,12 @@ export default function OwnerDashboard() {
     setCreatingShop(true)
     setCreateError(null)
 
+    if (!shopLocation) {
+      setCreateError('Pin your shop on the map so we can save its address.')
+      setCreatingShop(false)
+      return
+    }
+
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.access_token) {
       setCreatingShop(false)
@@ -183,6 +190,9 @@ export default function OwnerDashboard() {
         shop_name: shopForm.shopName,
         price_bw: Number(shopForm.priceBw),
         price_color: Number(shopForm.priceColor),
+        lat: shopLocation.lat,
+        lng: shopLocation.lng,
+        address: shopLocation.address,
       }),
     })
 
@@ -283,7 +293,7 @@ export default function OwnerDashboard() {
   if (!shop) {
     return (
       <AppShell>
-        <AppContainer className="py-8 max-w-xl">
+        <AppContainer className="py-8 max-w-2xl">
           <Card padding="lg" className="shadow-panel">
             <div className="mb-6 text-center">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-soft text-accent">
@@ -291,7 +301,7 @@ export default function OwnerDashboard() {
               </div>
               <h2 className="text-2xl font-bold text-foreground">Create your first shop</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Your owner account is ready. Add your shop details to start receiving orders.
+                Your owner account is ready. Add your shop details and pin it on the map.
               </p>
             </div>
 
@@ -312,6 +322,12 @@ export default function OwnerDashboard() {
                   disabled={creatingShop}
                 />
               </div>
+
+              <ShopLocationPicker
+                value={shopLocation}
+                onChange={setShopLocation}
+                disabled={creatingShop}
+              />
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
@@ -340,7 +356,12 @@ export default function OwnerDashboard() {
                 </div>
               </div>
 
-              <Button type="submit" size="lg" disabled={creatingShop} className="w-full">
+              <Button
+                type="submit"
+                size="lg"
+                disabled={creatingShop || !shopLocation}
+                className="w-full"
+              >
                 {creatingShop ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -576,6 +597,13 @@ function OrderCard({ order, onStatusChange, onAssignPartner }: {
                 </Button>
               </div>
             )}
+          </div>
+        )}
+
+        {order.status === 'out_for_delivery' && (
+          <div className="flex-1 flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-xl bg-[var(--status-out-for-delivery-soft)] border border-sky-200 text-[var(--status-out-for-delivery)]">
+            <ShoppingBag className="h-4 w-4" /> Out for Delivery
+            {order.delivery_partner?.name ? ` · ${order.delivery_partner.name}` : ''}
           </div>
         )}
       </div>
