@@ -5,7 +5,7 @@ export default async function UserLayout({ children }: { children: React.ReactNo
   await requireRole(['user'])
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans">
+    <div className="min-h-screen bg-background text-foreground font-sans">
       {children}
     </div>
   )

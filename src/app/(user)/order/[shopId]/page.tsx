@@ -5,10 +5,13 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { calcPrice } from '@/lib/utils/calcPrice'
 import { getPDFPageCount } from '@/lib/utils/getPageCount'
+import { AppShell, AppContainer, PageHeader } from '@/components/layout'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 import {
-  UploadCloud, FileText, Loader2, ArrowLeft,
-  CheckCircle2, Star, Clock, AlertCircle
+  UploadCloud, FileText, Loader2,
+  CheckCircle2, AlertCircle,
 } from 'lucide-react'
 
 interface Shop {
@@ -45,7 +48,7 @@ export default function OrderPage() {
   useEffect(() => {
     supabase.from('shops').select('*').eq('id', shopId).single()
       .then(({ data }) => setShop(data))
-  }, [shopId])
+  }, [shopId, supabase])
 
   const handleFile = useCallback(async (f: File) => {
     setFile(f)
@@ -56,13 +59,13 @@ export default function OrderPage() {
         const count = await getPDFPageCount(f)
         setPageCount(count)
       } catch (err) {
-        console.error("PDF detection error:", err)
+        console.error('PDF detection error:', err)
         setPageCount(1)
       } finally {
         setDetecting(false)
       }
     } else {
-      setPageCount(1) // for images/docx
+      setPageCount(1)
     }
   }, [])
 
@@ -78,25 +81,24 @@ export default function OrderPage() {
     : 0
 
   const handleSubmit = async () => {
-    if (!file || !shop || pageCount === 0 || !deliveryAddress.trim()) return
+    if (!shop || !file || pageCount === 0 || !deliveryAddress.trim()) return
     setSubmitting(true)
     setError(null)
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
+    if (!user) {
+      setError('You must be logged in')
+      setSubmitting(false)
+      return
+    }
 
-    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
+    const hour = new Date().getHours()
+    const slot = hour < 10 ? '12:00 PM' : '05:00 PM'
 
-    // Determine delivery slot (basic logic: noon or 5pm)
-    const now = new Date()
-    const cutoffNoon = new Date(); cutoffNoon.setHours(10, 0, 0, 0)
-    const slot = now < cutoffNoon ? '12:00 PM' : '05:00 PM'
-
-    // 1. Create order
     const { data: order, error: orderErr } = await supabase.from('orders').insert({
       user_id: user.id,
-      shop_id: shopId,
+      shop_id: shop.id,
       status: 'pending',
       total_pages: pageCount,
       print_type: printType,
@@ -114,7 +116,6 @@ export default function OrderPage() {
       return
     }
 
-    // 2. Upload file to Supabase Storage
     const ext = file.name.split('.').pop()
     const path = `${user.id}/${order.id}/file.${ext}`
     const { error: uploadErr } = await supabase.storage
@@ -129,7 +130,6 @@ export default function OrderPage() {
 
     const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(path)
 
-    // 3. Save document record
     await supabase.from('documents').insert({
       order_id: order.id,
       file_url: publicUrl,
@@ -143,39 +143,28 @@ export default function OrderPage() {
 
   if (!shop) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-      </div>
+      <AppShell className="flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      </AppShell>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      {/* Header */}
-      <header className="px-5 pt-6 pb-4 border-b border-white/5 bg-slate-950/90 backdrop-blur-xl sticky top-0 z-10">
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-3">
-          <ArrowLeft className="h-4 w-4" />
-          <span className="text-sm">Back</span>
-        </button>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold">{shop.shop_name}</h1>
-            <div className="flex items-center gap-3 mt-1">
-              <span className="flex items-center gap-1 text-xs text-slate-400">
-                <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {shop.rating}
-              </span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${shop.is_open ? 'bg-blue-500/15 text-blue-400' : 'bg-slate-700 text-slate-500'}`}>
-                {shop.is_open ? 'Open' : 'Closed'}
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
+    <AppShell>
+      <PageHeader
+        title={shop.shop_name}
+        subtitle={`★ ${shop.rating} · place your print order`}
+        fallbackHref="/shops"
+        actions={
+          <Badge variant={shop.is_open ? 'success' : 'muted'}>
+            {shop.is_open ? 'Open' : 'Closed'}
+          </Badge>
+        }
+      />
 
-      <div className="px-5 py-6 space-y-5 max-w-2xl mx-auto pb-32">
-        {/* File Upload */}
+      <AppContainer className="py-6 space-y-5 max-w-2xl pb-32">
         <div>
-          <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Upload Document</h2>
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Upload Document</h2>
           <div
             onDrop={onDrop}
             onDragOver={e => { e.preventDefault(); setDragOver(true) }}
@@ -183,10 +172,10 @@ export default function OrderPage() {
             onClick={() => document.getElementById('file-input')?.click()}
             className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-300 ${
               dragOver
-                ? 'border-blue-400/60 bg-blue-500/10'
+                ? 'border-accent bg-accent-soft'
                 : file
-                ? 'border-blue-500/40 bg-blue-500/5'
-                : 'border-white/10 bg-white/3 hover:border-white/20 hover:bg-white/6'
+                ? 'border-accent-border bg-accent-soft/50'
+                : 'border-border bg-surface hover:border-border-strong hover:bg-surface-muted'
             }`}
           >
             <input
@@ -199,142 +188,164 @@ export default function OrderPage() {
             {file ? (
               <div className="space-y-2">
                 <div className="flex items-center justify-center gap-2">
-                  <FileText className="h-8 w-8 text-blue-400" />
-                  {detecting && <Loader2 className="h-4 w-4 animate-spin text-slate-400" />}
+                  <FileText className="h-8 w-8 text-accent" />
+                  {detecting && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                 </div>
-                <p className="text-white font-medium truncate max-w-xs mx-auto">{file.name}</p>
-                <p className="text-sm text-blue-400">
+                <p className="text-foreground font-medium truncate max-w-xs mx-auto">{file.name}</p>
+                <p className="text-sm text-accent">
                   {detecting ? 'Detecting pages…' : `${pageCount} page${pageCount !== 1 ? 's' : ''} detected`}
                 </p>
-                <p className="text-xs text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB · Tap to change</p>
+                <p className="text-xs text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB · Tap to change</p>
               </div>
             ) : (
               <div className="space-y-3">
-                <UploadCloud className="h-10 w-10 text-slate-500 mx-auto" />
+                <UploadCloud className="h-10 w-10 text-subtle mx-auto" />
                 <div>
-                  <p className="text-slate-300 font-medium">Drop your file here</p>
-                  <p className="text-slate-500 text-sm mt-1">PDF, DOCX, JPG, PNG · Max 50MB</p>
+                  <p className="text-foreground font-medium">Drop your file here</p>
+                  <p className="text-muted-foreground text-sm mt-1">PDF, DOCX, JPG, PNG · Max 50MB</p>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Print Options */}
         <div>
-          <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Print Options</h2>
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Print Options</h2>
           <div className="space-y-3">
-            {/* Color */}
-            <div className="rounded-2xl bg-white/4 border border-white/8 p-4">
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-3">Print Type</p>
+            <Card>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Print Type</p>
               <div className="grid grid-cols-2 gap-2">
                 {(['bw', 'color'] as PrintType[]).map(pt => (
-                  <button key={pt} onClick={() => setPrintType(pt)}
-                    className={`rounded-xl py-3 text-sm font-semibold transition-all ${printType === pt ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>
+                  <button
+                    key={pt}
+                    type="button"
+                    onClick={() => setPrintType(pt)}
+                    className={`rounded-xl py-3 text-sm font-semibold transition-all ${
+                      printType === pt
+                        ? 'bg-accent text-white shadow-soft'
+                        : 'bg-surface-muted text-muted-foreground hover:bg-border'
+                    }`}
+                  >
                     {pt === 'bw' ? `B&W · ₹${shop.price_bw}/pg` : `Color · ₹${shop.price_color}/pg`}
                   </button>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            {/* Sides */}
-            <div className="rounded-2xl bg-white/4 border border-white/8 p-4">
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-3">Sides</p>
+            <Card>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Sides</p>
               <div className="grid grid-cols-2 gap-2">
                 {(['single', 'double'] as Sides[]).map(s => (
-                  <button key={s} onClick={() => setSides(s)}
-                    className={`rounded-xl py-3 text-sm font-semibold capitalize transition-all ${sides === s ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSides(s)}
+                    className={`rounded-xl py-3 text-sm font-semibold capitalize transition-all ${
+                      sides === s
+                        ? 'bg-accent text-white shadow-soft'
+                        : 'bg-surface-muted text-muted-foreground hover:bg-border'
+                    }`}
+                  >
                     {s === 'double' ? 'Double-sided (−10%)' : 'Single-sided'}
                   </button>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            {/* Copies */}
-            <div className="rounded-2xl bg-white/4 border border-white/8 p-4">
+            <Card>
               <div className="flex items-center justify-between">
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Copies</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">Copies</p>
                 <div className="flex items-center gap-4">
-                  <button onClick={() => setCopies(c => Math.max(1, c - 1))}
-                    className="w-8 h-8 rounded-full bg-white/8 hover:bg-white/16 text-white text-lg font-bold flex items-center justify-center transition-all">−</button>
-                  <span className="font-bold text-white text-lg w-6 text-center">{copies}</span>
-                  <button onClick={() => setCopies(c => Math.min(10, c + 1))}
-                    className="w-8 h-8 rounded-full bg-white/8 hover:bg-white/16 text-white text-lg font-bold flex items-center justify-center transition-all">+</button>
+                  <button
+                    type="button"
+                    onClick={() => setCopies(c => Math.max(1, c - 1))}
+                    className="w-8 h-8 rounded-full bg-surface-muted hover:bg-border text-foreground text-lg font-bold flex items-center justify-center transition-all"
+                  >
+                    −
+                  </button>
+                  <span className="font-bold text-foreground text-lg w-6 text-center">{copies}</span>
+                  <button
+                    type="button"
+                    onClick={() => setCopies(c => Math.min(10, c + 1))}
+                    className="w-8 h-8 rounded-full bg-surface-muted hover:bg-border text-foreground text-lg font-bold flex items-center justify-center transition-all"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
 
-        {/* Delivery Address */}
         <div>
-          <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Delivery Address</h2>
-          <div className="rounded-2xl bg-white/4 border border-white/8 p-4">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Delivery Address</h2>
+          <Card>
             <textarea
               rows={3}
               placeholder="Enter your full delivery address (house no., street, area, city…)"
               value={deliveryAddress}
               onChange={e => setDeliveryAddress(e.target.value)}
-              className="w-full bg-transparent text-white placeholder:text-slate-500 text-sm resize-none focus:outline-none"
+              className="w-full bg-transparent text-foreground placeholder:text-subtle text-sm resize-none focus:outline-none"
             />
-          </div>
+          </Card>
         </div>
 
-        {/* Price Breakdown */}
         {file && pageCount > 0 && (
-          <div className="rounded-2xl bg-gradient-to-br from-blue-900/30 to-slate-900/50 border border-blue-500/20 p-5">
-            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Price Breakdown</h2>
+          <Card className="border-accent-border bg-accent-soft/40">
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Price Breakdown</h2>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-muted-foreground">
                 <span>{pageCount} pages × ₹{printType === 'bw' ? shop.price_bw : shop.price_color} × {copies} {copies > 1 ? 'copies' : 'copy'}</span>
                 <span>₹{(pageCount * (printType === 'bw' ? shop.price_bw : shop.price_color) * copies).toFixed(2)}</span>
               </div>
               {sides === 'double' && (
-                <div className="flex justify-between text-blue-400">
+                <div className="flex justify-between text-accent">
                   <span>Double-sided discount (−10%)</span>
                   <span>−₹{(pageCount * (printType === 'bw' ? shop.price_bw : shop.price_color) * copies * 0.1).toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-muted-foreground">
                 <span>Platform fee</span>
                 <span>₹2.00</span>
               </div>
-              <div className="border-t border-white/10 pt-2 flex justify-between font-bold text-white text-base">
+              <div className="border-t border-border pt-2 flex justify-between font-bold text-foreground text-base">
                 <span>Total (Cash on Delivery)</span>
-                <span className="text-blue-400">₹{price.toFixed(2)}</span>
+                <span className="text-accent">₹{price.toFixed(2)}</span>
               </div>
             </div>
-          </div>
+          </Card>
         )}
 
         {error && (
-          <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+          <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-danger-soft p-4 text-sm text-danger">
             <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
-      </div>
+      </AppContainer>
 
-      {/* Sticky Footer CTA */}
-      <div className="fixed bottom-0 inset-x-0 p-5 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent">
-        <Button
-          onClick={handleSubmit}
-          disabled={!file || pageCount === 0 || detecting || submitting || !shop.is_open || !deliveryAddress.trim()}
-          className="w-full h-14 text-base font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 rounded-2xl shadow-xl shadow-blue-500/20 disabled:opacity-40"
-        >
-          {submitting ? (
-            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Placing Order…</>
-          ) : !shop.is_open ? (
-            'Shop is Closed'
-          ) : !file ? (
-            'Upload a Document First'
-          ) : pageCount === 0 || detecting ? (
-            'Detecting Pages…'
-          ) : (
-            <><CheckCircle2 className="mr-2 h-5 w-5" /> Confirm Order · ₹{price.toFixed(2)}</>
-          )}
-        </Button>
+      <div className="fixed bottom-0 inset-x-0 z-20 border-t border-border bg-background/95 backdrop-blur-xl">
+        <AppContainer className="py-4 max-w-2xl">
+          <Button
+            size="lg"
+            onClick={handleSubmit}
+            disabled={!file || pageCount === 0 || detecting || submitting || !shop.is_open || !deliveryAddress.trim()}
+            className="w-full h-14 text-base rounded-2xl shadow-elevated disabled:opacity-40"
+          >
+            {submitting ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Placing Order…</>
+            ) : !shop.is_open ? (
+              'Shop is Closed'
+            ) : !file ? (
+              'Upload a Document First'
+            ) : pageCount === 0 || detecting ? (
+              'Detecting Pages…'
+            ) : (
+              <><CheckCircle2 className="mr-2 h-5 w-5" /> Confirm Order · ₹{price.toFixed(2)}</>
+            )}
+          </Button>
+        </AppContainer>
       </div>
-    </div>
+    </AppShell>
   )
 }

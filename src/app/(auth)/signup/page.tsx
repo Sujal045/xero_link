@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Printer, Loader2, ArrowRight, User, Building2, Truck, Mail } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SignupFormValues, signupFormSchema } from '@/lib/validations/auth'
@@ -98,40 +99,44 @@ export default function SignupPage() {
   if (emailConfirmRequired) {
     return (
       <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-500 my-8">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-xl text-center space-y-4">
+        <Card padding="lg" className="shadow-panel text-center space-y-4">
           <div className="flex justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/30">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-elevated">
               <Mail className="h-8 w-8 text-white" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-white">Check your email</h2>
-          <p className="text-slate-400 text-sm">
-            We sent a confirmation link to <span className="text-white font-medium">{email}</span>. Open it to activate your account.
+          <h2 className="text-2xl font-bold text-foreground">Check your email</h2>
+          <p className="text-muted-foreground text-sm">
+            We sent a confirmation link to{' '}
+            <span className="text-foreground font-medium">{email}</span>. Open it to activate your account.
           </p>
-          <Link href="/login" className="inline-block mt-2 text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors">
+          <Link
+            href="/login"
+            className="inline-block mt-2 text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
+          >
             Back to Sign In
           </Link>
-        </div>
+        </Card>
       </div>
     )
   }
 
   return (
     <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-500 my-8">
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-xl">
+      <Card padding="lg" className="shadow-panel">
         <div className="flex flex-col items-center space-y-3 mb-8">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/30">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-elevated">
             <Printer className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Create Account</h1>
-          <p className="text-sm text-slate-400 text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Create Account</h1>
+          <p className="text-sm text-muted-foreground text-center">
             Join XeroLink and start connecting
           </p>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4" noValidate>
           {error && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400 backdrop-blur-md">
+            <div className="rounded-xl border border-red-200 bg-danger-soft p-4 text-sm text-danger">
               {error}
             </div>
           )}
@@ -147,10 +152,10 @@ export default function SignupPage() {
                 type="button"
                 onClick={() => setRole(value)}
                 className={cn(
-                  'flex flex-col items-center justify-center space-y-2 p-3 rounded-2xl border transition-all duration-300',
+                  'flex flex-col items-center justify-center space-y-2 p-3 rounded-2xl border transition-all duration-200',
                   role === value
-                    ? 'border-blue-500/50 bg-blue-500/10 text-blue-400 shadow-lg shadow-blue-500/5'
-                    : 'border-white/10 bg-black/20 text-slate-400 hover:bg-white/5 hover:text-slate-300'
+                    ? 'border-accent-border bg-accent-soft text-accent shadow-soft'
+                    : 'border-border bg-surface text-muted-foreground hover:bg-surface-muted hover:text-foreground'
                 )}
               >
                 <Icon className="h-5 w-5" />
@@ -158,17 +163,20 @@ export default function SignupPage() {
               </button>
             ))}
           </div>
+          {fieldErrors.role?.[0] && (
+            <p className="text-xs text-danger -mt-1">{fieldErrors.role[0]}</p>
+          )}
 
           {([
-            { id: 'name', label: 'Full Name', type: 'text', placeholder: 'John Doe', value: name, onChange: setName, field: 'name' as SignupField },
-            { id: 'email', label: 'Email', type: 'email', placeholder: 'you@example.com', value: email, onChange: setEmail, field: 'email' as SignupField },
-            { id: 'phone', label: 'Phone Number', type: 'tel', placeholder: '9876543210', value: phone, onChange: setPhone, field: 'phone' as SignupField },
-            { id: 'password', label: 'Password', type: 'password', placeholder: '••••••••', value: password, onChange: setPassword, field: 'password' as SignupField },
-          ]).map(({ id, label, type, placeholder, value, onChange, field }) => {
+            { id: 'name', label: 'Full Name', type: 'text', placeholder: 'John Doe', value: name, onChange: setName, field: 'name' as SignupField, autoComplete: 'name' },
+            { id: 'email', label: 'Email', type: 'email', placeholder: 'you@example.com', value: email, onChange: setEmail, field: 'email' as SignupField, autoComplete: 'email' },
+            { id: 'phone', label: 'Phone Number', type: 'tel', placeholder: '9876543210', value: phone, onChange: setPhone, field: 'phone' as SignupField, autoComplete: 'tel' },
+            { id: 'password', label: 'Password', type: 'password', placeholder: '••••••••', value: password, onChange: setPassword, field: 'password' as SignupField, autoComplete: 'new-password' },
+          ]).map(({ id, label, type, placeholder, value, onChange, field, autoComplete }) => {
             const fieldError = fieldErrors[field]?.[0] ?? null
             return (
-              <div key={id} className="space-y-1">
-                <label htmlFor={id} className="text-xs font-medium text-slate-300 uppercase tracking-wider ml-1">
+              <div key={id} className="space-y-1.5">
+                <label htmlFor={id} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-0.5">
                   {label}
                 </label>
                 <Input
@@ -178,38 +186,34 @@ export default function SignupPage() {
                   value={value}
                   onChange={(e) => onChange(e.target.value)}
                   disabled={loading}
-                  className="bg-black/20 text-white placeholder:text-slate-500 border-white/10 focus-visible:border-blue-500/50"
+                  autoComplete={autoComplete}
                 />
                 {fieldError && (
-                  <p className="ml-1 text-xs text-red-400">{fieldError}</p>
+                  <p className="ml-0.5 text-xs text-danger">{fieldError}</p>
                 )}
               </div>
             )
           })}
 
-          <Button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white shadow-blue-500/25 h-12 text-base rounded-xl mt-4 group"
-            disabled={loading}
-          >
+          <Button type="submit" size="lg" className="w-full mt-4 group" disabled={loading}>
             {loading ? (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             ) : (
               <>
                 Create Account
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="ml-1 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </>
             )}
           </Button>
         </form>
 
-        <div className="mt-8 text-center text-sm text-slate-400">
+        <div className="mt-8 text-center text-sm text-muted-foreground">
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold text-blue-400 hover:text-blue-300 transition-colors">
+          <Link href="/login" className="font-semibold text-accent hover:text-accent-hover transition-colors">
             Sign In
           </Link>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

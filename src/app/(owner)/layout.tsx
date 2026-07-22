@@ -5,7 +5,7 @@ export default async function OwnerLayout({ children }: { children: React.ReactN
   await requireRole('owner')
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans">
+    <div className="min-h-screen bg-background text-foreground font-sans">
       {children}
     </div>
   )
